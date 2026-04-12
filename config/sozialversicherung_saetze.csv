@@ -1,0 +1,6 @@
+typ,wert,beschreibung
+krankenversicherung_basis,14.6,Krankenversicherung Basis (Arbeitnehmer-Anteil = Hälfte von 14.6)
+rentenversicherung,9.3,Rentenversicherung (Arbeitnehmer-Anteil)
+arbeitslosenversicherung,1.3,Arbeitslosenversicherung (Arbeitnehmer-Anteil)
+pflegeversicherung_standard,1.525,Pflegeversicherung Standard
+pflegeversicherung_kinderlos,2.05,Pflegeversicherung kinderlos über 23 Jahre

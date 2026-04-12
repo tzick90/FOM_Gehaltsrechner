@@ -1,0 +1,7 @@
+typ,wert,beschreibung
+lohnsteuer_klasse_1,20.0,Lohnsteuer Steuerklasse I (vereinfacht)
+lohnsteuer_klasse_3,15.0,Lohnsteuer Steuerklasse III (vereinfacht)
+lohnsteuer_klasse_4,18.0,Lohnsteuer Steuerklasse IV (vereinfacht)
+solidaritaetszuschlag,5.5,Solidaritätszuschlag (5,5% der Lohnsteuer)
+kirchensteuer_8,8.0,Kirchensteuer 8 Prozent (z.B. Baden-Württemberg Bayern)
+kirchensteuer_9,9.0,Kirchensteuer 9 Prozent (z.B. restliche Bundesländer)
