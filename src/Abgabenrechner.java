@@ -1,13 +1,32 @@
 public class Abgabenrechner {
 
-
-
-
     /**
-    - Methode zur Berechnung der Krankenversicherung
-    - Arbeitnehmer zahl 50% von (Basis + Zusatzbeitrag)
+     * Innere Klasse: Speichert Beitragsinformationen einer Krankenkasse
+     */
+    public static class KrankenkassenInfo {
 
-    */
+        private double gesamtbeitrag;
+        private double zusatzbeitrag;
+
+        public KrankenkassenInfo(double gesamtbeitrag, double zusatzbeitrag) {
+            this.gesamtbeitrag = gesamtbeitrag;
+            this.zusatzbeitrag = zusatzbeitrag;
+        }
+
+        public double getGesamtbeitrag() {
+            return gesamtbeitrag;
+        }
+
+        public double getZusatzbeitrag() {
+            return zusatzbeitrag;
+        }
+
+        @Override
+        public String toString() {
+            // ← MUSS INNERHALB von KrankenkassenInfo sein!
+            return "Gesamt: " + gesamtbeitrag + "%, Zusatz: " + zusatzbeitrag + "%";
+        }
+    }
 
     public static double berechneKrankenversicherung(
             double bruttogehalt,
