@@ -2,5 +2,6 @@ typ,wert,beschreibung
 krankenversicherung_basis,14.6,Krankenversicherung Basis (Arbeitnehmer-Anteil = Hälfte von 14.6)
 rentenversicherung,9.3,Rentenversicherung (Arbeitnehmer-Anteil)
 arbeitslosenversicherung,1.3,Arbeitslosenversicherung (Arbeitnehmer-Anteil)
-pflegeversicherung_standard,1.525,Pflegeversicherung Standard
-pflegeversicherung_kinderlos,2.05,Pflegeversicherung kinderlos über 23 Jahre
+pflegeversicherung_basis,1.8,PV Basis AN-Anteil 2025
+pflegeversicherung_zuschlag_kinderlos,0.6,PV Zuschlag für Kinderlose >23 Jahre
+pflegeversicherung_abschlag_pro_kind,0.25,PV Abschlag pro Kind ab 2. Kind (max 5 Kinder)

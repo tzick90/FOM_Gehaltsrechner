@@ -4,8 +4,12 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        Map<String, Abgabenrechner.KrankenkassenInfo> krankenkassen;
+        // ALLE Variablen am Anfang deklarieren
         Map<String, Double> svSaetze;
+        Map<String, Abgabenrechner.KrankenkassenInfo> krankenkassen;
+
+        int anzahlKinder;  // ← NEU statt boolean hatKinder
+
 
         try {
             // Sozialversicherung Basis laden
@@ -55,8 +59,8 @@ public class Main {
         int alter = scanner.nextInt();
 
         //Anzahl Kinder
-        System.out.print("\nHaben Sie Kinder?:");
-        boolean hatKinder = scanner.hasNextBoolean();
+        System.out.print("Anzahl Kinder unter 25 Jahren (0-5): ");
+        anzahlKinder = scanner.nextInt();
 
 
         // KV-Basis aus HashMap holen
@@ -81,14 +85,16 @@ public class Main {
 
 
         // 4. Pflegeversicherung
-        double pvStandard = svSaetze.get("pflegeversicherung_standard");
-        double pvKinderlos = svSaetze.get("pflegeversicherung_kinderlos");
-        boolean kinderlos = !hatKinder;
+        double pvBasis = svSaetze.get("pflegeversicherung_basis");
+        double pvZuschlag = svSaetze.get("pflegeversicherung_zuschlag_kinderlos");
+        double pvAbschlag = svSaetze.get("pflegeversicherung_abschlag_pro_kind");
+
         double pvBeitrag = Abgabenrechner.berechnePflegeversicherung(
                 brutto,
-                pvStandard,
-                pvKinderlos,
-                kinderlos,
+                pvBasis,
+                pvZuschlag,
+                pvAbschlag,
+                anzahlKinder,
                 alter
         );
 
@@ -121,10 +127,21 @@ public class Main {
         System.out.println("  AN-Anteil:               " + String.format("%8.2f €", avBeitrag));
 
         System.out.println("\nPflegeversicherung:");
-        if (kinderlos && alter > 23) {
-            System.out.println("  Beitragssatz:            " + pvKinderlos + "% (kinderlos >23)");
+        double pvSatz = (pvBeitrag / brutto) * 100;  // Rückrechnung des tatsächlichen Satzes
+
+        if (anzahlKinder == 0 && alter > 23) {
+            System.out.println("  Status:                  Kinderlos >23 Jahre");
+            System.out.println("  Beitragssatz:            " + String.format("%.2f", pvSatz) + "% (Basis 1.8% + Zuschlag 0.6%)");
+        } else if (anzahlKinder >= 2) {
+            System.out.println("  Status:                  " + anzahlKinder + " Kinder");
+            double abschlag = Math.min(anzahlKinder - 1, 4) * 0.25;
+            System.out.println("  Beitragssatz:            " + String.format("%.2f", pvSatz) + "% (Basis 1.8% - Abschlag " + String.format("%.2f", abschlag) + "%)");
+        } else if (anzahlKinder == 1) {
+            System.out.println("  Status:                  1 Kind");
+            System.out.println("  Beitragssatz:            " + String.format("%.2f", pvSatz) + "% (Basis-Satz)");
         } else {
-            System.out.println("  Beitragssatz:            " + pvStandard + "%");
+            System.out.println("  Status:                  ≤23 Jahre");
+            System.out.println("  Beitragssatz:            " + String.format("%.2f", pvSatz) + "% (Basis-Satz)");
         }
         System.out.println("  AN-Anteil:               " + String.format("%8.2f €", pvBeitrag));
 
