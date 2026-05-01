@@ -5,15 +5,16 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         // ALLE Variablen am Anfang deklarieren
+        int jahr;
         Map<String, Double> svSaetze;
         Map<String, Abgabenrechner.KrankenkassenInfo> krankenkassen;
 
         int anzahlKinder;  // ← NEU statt boolean hatKinder
 
-
+        jahr = 2026;
         try {
             // Sozialversicherung Basis laden
-            svSaetze = CsvReader.lesen("config/sozialversicherung_saetze.csv");
+            svSaetze = CsvReader.lesenMitJahr("config/sozialversicherung_saetze.csv", jahr);
 
             // Krankenkassen laden
             krankenkassen = CsvReader.leseKrankenkassen("config/krankenkassen.csv");
@@ -24,6 +25,18 @@ public class Main {
             System.err.println("✗ Fehler beim Laden der CSVs: " + e.getMessage());
             return; // Programm beenden
         }
+
+        // BBG-Werte aus CSV holen
+        double bbgKV = svSaetze.get("bbg_kranken_pflege");
+        double bbgRV = svSaetze.get("bbg_renten_arbeitslosen");
+
+        // Sozialversicherungs-Gesamtsätze aus CSV holen
+        double kvBasis = svSaetze.get("krankenversicherung_basis");  // 14.6%
+        double rvSatzGesamt = svSaetze.get("rentenversicherung");    // 18.6%
+        double avSatzGesamt = svSaetze.get("arbeitslosenversicherung");  // 2.6%
+        double pvSatzGesamt = svSaetze.get("pflegeversicherung_basis");  // 3.6%
+        double pvZuschlag = svSaetze.get("pflegeversicherung_zuschlag_kinderlos");  // 0.6
+        double pvAbschlag = svSaetze.get("pflegeversicherung_abschlag_pro_kind");   // 0.25
 
         System.out.println("\nVerfügbare Krankenkassen:");
         System.out.println("==========================");
@@ -63,39 +76,44 @@ public class Main {
         anzahlKinder = scanner.nextInt();
 
 
-        // KV-Basis aus HashMap holen
-        Abgabenrechner.KrankenkassenInfo kkInfo = krankenkassen.get(gewählteKK);
-        double kvBasis = svSaetze.get("krankenversicherung_basis");
+        // ========================================
+        // SOZIALABGABEN BERECHNEN
+        // ========================================
 
-        // KV-Zusatz der gewählten Krankenkasse holen
-        double kvZusatz = kkInfo.getZusatzbeitrag();
-
-        // Berechnung der Sozialabgaben
         // 1. Krankenversicherung
-        double kvGesamt = kkInfo.getGesamtbeitrag();
-        double kvBeitrag = brutto * (kvGesamt/2)/100;
+        Abgabenrechner.KrankenkassenInfo kkInfo = krankenkassen.get(gewählteKK);
+        double kvZusatz = kkInfo.getZusatzbeitrag();  // z.B. 2.69%
+
+        double kvBeitrag = Abgabenrechner.berechneKrankenversicherung(
+                brutto,
+                kvBasis,   // 14.6%
+                kvZusatz,  // z.B. 2.69%
+                bbgKV
+        );
 
         // 2. Rentenversicherung
-        double rvSatz = svSaetze.get("rentenversicherung");
-        double rvBeitrag = Abgabenrechner.berechneRentenversicherung(brutto, rvSatz);
+        double rvBeitrag = Abgabenrechner.berechneRentenversicherung(
+                brutto,
+                rvSatzGesamt,  // 18.6%
+                bbgRV
+        );
 
         // 3. Arbeitslosenversicherung
-        double avSatz = svSaetze.get("arbeitslosenversicherung");
-        double avBeitrag = Abgabenrechner.berechneArbeitslosenversicherung(brutto,avSatz);
-
+        double avBeitrag = Abgabenrechner.berechneArbeitslosenversicherung(
+                brutto,
+                avSatzGesamt,  // 2.6%
+                bbgRV
+        );
 
         // 4. Pflegeversicherung
-        double pvBasis = svSaetze.get("pflegeversicherung_basis");
-        double pvZuschlag = svSaetze.get("pflegeversicherung_zuschlag_kinderlos");
-        double pvAbschlag = svSaetze.get("pflegeversicherung_abschlag_pro_kind");
-
         double pvBeitrag = Abgabenrechner.berechnePflegeversicherung(
                 brutto,
-                pvBasis,
-                pvZuschlag,
-                pvAbschlag,
+                pvSatzGesamt,  // 3.6%
+                pvZuschlag,    // 0.6%
+                pvAbschlag,    // 0.25%
                 anzahlKinder,
-                alter
+                alter,
+                bbgKV
         );
 
         // Summe Sozialabgaben
@@ -106,24 +124,24 @@ public class Main {
         // ========================================
 
         System.out.println("\n" + "=".repeat(60));
-        System.out.println("ERGEBNIS - Sozialabgaben");
+        System.out.println("ERGEBNIS - Sozialabgaben (Jahr " + jahr +")");
         System.out.println("=".repeat(60));
         System.out.println("Bruttogehalt:              " + String.format("%8.2f €", brutto));
         System.out.println("Krankenkasse:              " + gewählteKK);
         System.out.println("-".repeat(60));
 
         System.out.println("\nKrankenversicherung:");
-        System.out.println("  Gesamtbeitrag:           " + kvGesamt + "%");
+        System.out.println("  Gesamtbeitrag:           " + (kvBasis + kvZusatz) + "%");
         System.out.println("  ..davon KV-Beitrag:      " + kvBasis + "%");
         System.out.println("  ..davon Zusatzbeitrag:   " + kvZusatz + "%");
         System.out.println("  AN-Anteil (50%):         " + String.format("%8.2f €", kvBeitrag));
 
         System.out.println("\nRentenversicherung:");
-        System.out.println("  Beitragssatz:            " + rvSatz + "%");
+        System.out.println("  Beitragssatz:            " + rvSatzGesamt + "%");
         System.out.println("  AN-Anteil:               " + String.format("%8.2f €", rvBeitrag));
 
         System.out.println("\nArbeitslosenversicherung:");
-        System.out.println("  Beitragssatz:            " + avSatz + "%");
+        System.out.println("  Beitragssatz:            " + avSatzGesamt + "%");
         System.out.println("  AN-Anteil:               " + String.format("%8.2f €", avBeitrag));
 
         System.out.println("\nPflegeversicherung:");

@@ -1,21 +1,24 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.rmi.ServerError;
+import java.sql.SQLSyntaxErrorException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CsvReader {
 
     /**
-     * Liest eine CSV-Datei und gibt eine HashMap zurück
-     * Format: spalte1,spalte2,spalte3
+     * Liest eine CSV-Datei mit Jahr-Filter und gibt eine HashMap zurück
+     * Format: Typ, Wert, Jahr, Beschreibung
      * Erste Zeile ist Header (wird übersprungen)
      *
      * @param dateipfad Pfad zur CSV-Datei
+     * @param jahr Jahr zum Filtern (z.B. 2025)
      * @return HashMap mit spalte1 -> spalte2 (als Double)
      * @throws IOException wenn Datei nicht gefunden
      */
-    public static Map<String, Double> lesen(String dateipfad) throws IOException {
+    public static Map<String, Double> lesenMitJahr(String dateipfad, int jahr) throws IOException {
 
         Map<String, Double> daten = new HashMap<>();
 
@@ -36,25 +39,43 @@ public class CsvReader {
                 // An Komma splitten
                 String[] teile = zeile.split(",");
 
-                // Validierung: Mindestens 2 Spalten?
-                if (teile.length < 2) {
-                    throw new IllegalArgumentException(
-                            "Ungültiges CSV-Format in Zeile: " + zeile
-                    );
+                // Validierung: Mindestens 3 Spalten?
+                if (teile.length < 3) {
+                    System.err.println("Überspringe ungültige Zeile: " + zeile);
+                    continue;
                 }
 
-                // Key = erste Spalte
-                String key = teile[0].trim();
+                // Spalte 0: Typ
+                String typ = teile[0].trim();
 
-                // Value = zweite Spalte (als Double)
+                // Spalte 1: Wert
+                String wertStr = teile[1].trim();
+
+                // Spalte 2: Jahr
+                int zeilenJahr;
                 try {
-                    double value = Double.parseDouble(teile[1].trim());
-                    daten.put(key, value);
+                    zeilenJahr = Integer.parseInt(teile[2].trim());
                 } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException(
-                            "Ungültige Zahl in Zeile: " + zeile + " (Wert: " + teile[1] + ")"
-                    );
+                    System.err.println("Ungültiges Jahr in Zeile: " + zeile);
+                    continue;
                 }
+
+                // Jahr-Filter: Nur gewähltes Jahr laden
+                if (zeilenJahr != jahr) {
+                    continue; // Zeile überspringen
+                }
+
+                // Wert parsen
+                try {
+                    double wert = Double.parseDouble(wertStr);
+                    daten.put(typ, wert);
+                } catch (NumberFormatException e) {
+                    System.err.println("Ungültige Zahl in Zeile: " + zeile + " (Wert: " + wertStr + ")");
+                }
+
+
+
+
             }
         }
 

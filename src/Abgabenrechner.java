@@ -28,35 +28,75 @@ public class Abgabenrechner {
         }
     }
 
+    /**
+     * Berechnet den Arbeitnehmeranteil der Krankenversicherung
+     * Arbeitnehmer zahlt 50% des Gesamtbeitragssatzes
+     *
+     * @param bruttogehalt Bruttogehalt, monatlich
+     * @param kvBasis KV Basis-Beitragssatz (14,6%)
+     * @param kvZusatz KV Zusatzbeitrag der Krankenkasse (z.B. 2,69%)
+     * @param bbgKV Beitragsbemessungsgrenze KV
+     * @return KV-Beitrag Arbeitnehmeranteil in EUR
+     */
+
     public static double berechneKrankenversicherung(
             double bruttogehalt,
             double kvBasis,
-            double kvZusatz
+            double kvZusatz,
+            double bbgKV
     ) {
-        // Arbeitnehmer zahlt nur die Hälfte (Arbeitgeber zahlt andere Hälfte)
-        return bruttogehalt * ((kvBasis + kvZusatz) / 2) / 100;
+        double bemessungsgrundlage = Math.min(bruttogehalt, bbgKV);
+
+        // Arbeitnehmer zahlt 50% von (Basis + Zusatz)
+        double kvSatzAN = (kvBasis + kvZusatz) / 2;
+
+        return bemessungsgrundlage * kvSatzAN / 100;
     }
 
     /**
      *Berechnet die Rentenversicherung (Arbeitnehmeranteil)
+     * AN zahlt 50% des Gesamtbeitragssatzes
+     *
+     * @param bruttogehalt Bruttogehalt monatlich
+     * @param rvSatzGesamt RF Gesamtbeitragssatz (z.B. 18,6%)
+     * @param bbgRV Beitragsbemessungsgrenze Rentenversicherung
+     * @return RV-Beitrag Arbeitnehmeranteil in EUR
      */
 
     public static double berechneRentenversicherung(
             double bruttogehalt,
-            double rvSatz
+            double rvSatzGesamt,  // 18.6%
+            double bbgRV
     ) {
-        return bruttogehalt * rvSatz / 100;
+        double bemessungsgrundlage = Math.min(bruttogehalt, bbgRV);
+
+        // Arbeitnehmer zahlt die Hälfte
+        double rvSatzAN = rvSatzGesamt / 2;  // 18.6 / 2 = 9.3%
+
+        return bemessungsgrundlage * rvSatzAN / 100;
     }
 
     /**
      * Berechnet die Arbeitslosenversicherung (AN-Anteil)
+     * Arbeitnehmer zahlt 50% des Gesamtbeitragssatzes
+     *
+     * @param bruttogehalt Bruttogehalt monatlich
+     * @param avSatzGesamt AV Gesamtbeitragssatz (z.B. 2.6%)
+     * @param bbgAV Beitragsbemessungsgrenze AV
+     * @return AV-Beitrag Arbeitnehmeranteil in Euro
      */
 
     public static double berechneArbeitslosenversicherung(
             double bruttogehalt,
-            double avSatz
+            double avSatzGesamt, // Aktuell 2,6%
+            double bbgAV
     ) {
-        return bruttogehalt * avSatz / 100;
+        double bemessungsgrundlage = Math.min(bruttogehalt, bbgAV);
+
+        // Arbeitnehmer zahlt die Hälfte
+        double avSatzAN = avSatzGesamt / 2; //2,6% / 2 = 1,3%
+
+        return bruttogehalt * avSatzAN / 100;
     }
 
     /**
@@ -75,25 +115,32 @@ public class Abgabenrechner {
      * - 5 Kinder: 0.8%
      *
      * @param bruttogehalt Bruttogehalt in Euro
-     * @param pvBasis Basis-Satz (1.8%)
+     * @param pvSatzGesamt Basis-Satz (1.8%)
      * @param pvZuschlagKinderlos Zuschlag für Kinderlose (0.6%)
      * @param pvAbschlagProKind Abschlag pro Kind ab dem 2. Kind (0.25%)
      * @param anzahlKinder Anzahl Kinder unter 25 Jahren
      * @param alter Alter des Versicherten
-     * @return PV-Beitrag in Euro
+     * @param bbgPV Beitragsbemessungsgrenze PV
+     * @return PV-Beitrag in EUR
      */
 
 
      public static double berechnePflegeversicherung(
             double bruttogehalt,
-            double pvBasis,             // 1.8
+            double pvSatzGesamt,          // 3.6%
             double pvZuschlagKinderlos, // 0.6
             double pvAbschlagProKind,   // 0.25
             int anzahlKinder,
-            int alter
+            int alter,
+            double bbgPV
     ) {
+         double bemessungsgrundlage = Math.min(bruttogehalt, bbgPV);
+
+         // Arbeitnehmeranteil Basis = Hälfte des Gesamtsatzes
+         double satz = pvSatzGesamt / 2;  // 3.6 / 2 = 1.8%
+
         // Kinderlose über 23 zahlen Zuschlag
-        double satz = pvBasis;                      // Start bei 1.8%
+
          if (anzahlKinder == 0 && alter > 23) {
              // Kinderlos über 23: Zuschlag
              satz += pvZuschlagKinderlos;  // 1.8 + 0.6 = 2.4%
@@ -111,7 +158,7 @@ public class Abgabenrechner {
          }
          // 1 Kind oder ≤23 Jahre: Bleibt bei Basis-Satz 1.8%
 
-         return bruttogehalt * satz / 100;
+         return bemessungsgrundlage * satz / 100;
      }
 
     /**
