@@ -8,8 +8,12 @@ public class Main {
         int jahr;
         Map<String, Double> svSaetze;
         Map<String, Abgabenrechner.KrankenkassenInfo> krankenkassen;
+        Map<String, Double> einkommensteuerGrenzen;
+        Map<String, CsvReader.BundeslandInfo> bundeslaender;
 
         int anzahlKinder;  // ← NEU statt boolean hatKinder
+        String gewähltesBundesland;
+        boolean istKirchenmitglied;
 
         jahr = 2026;
         try {
@@ -18,6 +22,12 @@ public class Main {
 
             // Krankenkassen laden
             krankenkassen = CsvReader.leseKrankenkassen("config/krankenkassen.csv");
+
+            // Einkommensteuergrenzen laden
+            einkommensteuerGrenzen = CsvReader.lesenMitJahr("config/einkommensteuer_grenzen.csv", jahr);
+
+            // Bundesländer laden
+            bundeslaender = CsvReader.leseBundeslaenderMitJahr("config/Bundesland_und_Kirchensteuer.csv", jahr);
 
             System.out.println("✓ CSVs erfolgreich geladen!");
 
@@ -75,6 +85,40 @@ public class Main {
         System.out.print("Anzahl Kinder unter 25 Jahren (0-5): ");
         anzahlKinder = scanner.nextInt();
 
+        // Bundesland auswählen:
+        System.out.println("\nVerfügbare Bundesländer:");
+        System.out.println("=".repeat(60));
+
+        int i_1 = 1;
+        for (String blName : bundeslaender.keySet()) {
+            CsvReader.BundeslandInfo blInfo = bundeslaender.get(blName);
+            System.out.println(i_1 + ". " + blName +
+                    " (Kirchensteuer: " + blInfo.getKirchensteuer() + "%, " +
+                    "Region: " + blInfo.getRegion() + ")");
+            i_1++;
+        }
+
+        System.out.print("\nWählen Sie ein Bundesland (1-" + bundeslaender.size() + "): ");
+        int blAuswahl = scanner.nextInt();
+
+        // Erstellen eines Arrays aus Map-Key für Index-Zugriff
+        String[] blNamen = bundeslaender.keySet().toArray(new String[0]);
+        gewähltesBundesland = blNamen[blAuswahl -1];
+
+        System.out.println("✓ Gewählt: " + gewähltesBundesland);
+
+
+        // Kirchenmitgliedschaft abfragen
+        System.out.print("\nSind Sie Kirchenmitglied? (true/false): ");
+        istKirchenmitglied = scanner.nextBoolean();
+
+        if (istKirchenmitglied) {
+            System.out.println("✓ Kirchensteuer wird berechnet (" +
+                    bundeslaender.get(gewähltesBundesland).getKirchensteuer() + "%)");
+        } else {
+            System.out.println("✓ Keine Kirchensteuer");
+        }
+
 
         // ========================================
         // SOZIALABGABEN BERECHNEN
@@ -120,8 +164,81 @@ public class Main {
         double sozialabgabenGesamt = kvBeitrag + rvBeitrag + avBeitrag + pvBeitrag;
 
         // ========================================
+        // STEUERN BERECHNEN
+        // ========================================
+
+        // Einkommensteuer-Grenzen laden
+        double grundfreibetrag = einkommensteuerGrenzen.get("grundfreibetrag");
+        double zone1Ende = einkommensteuerGrenzen.get("zone1_ende");
+        double zone2Ende = einkommensteuerGrenzen.get("zone2_ende");
+        double zone3Ende = einkommensteuerGrenzen.get("zone3_ende");
+
+        // Lohnsteuer berechnen (nach §32a EStG) - JAHR
+        // Hier wird sozialabgabenGesamt übergeben!
+        double lohnsteuerJahr = Gehaltsrechner.berechneLohnsteuerJahr(
+                brutto,
+                sozialabgabenGesamt,
+                grundfreibetrag,
+                zone1Ende,
+                zone2Ende,
+                zone3Ende,
+                jahr
+        );
+
+        double lohnsteuerMonat = lohnsteuerJahr / 12;
+
+        // Kirchensteuer berechnen - JAHR
+        CsvReader.BundeslandInfo blInfo = bundeslaender.get(gewähltesBundesland);
+        double kirchensteuersatz = blInfo.getKirchensteuer();
+        double kirchensteuerJahr = Gehaltsrechner.berechneKirchensteuerJahr(
+                lohnsteuerJahr,
+                kirchensteuersatz,
+                istKirchenmitglied
+        );
+        double kirchensteuerMonat = kirchensteuerJahr / 12;
+
+        // Steuern gesamt
+        double steuernGesamtJahr = lohnsteuerJahr + kirchensteuerJahr;
+        double steuernGesamtMonat = lohnsteuerMonat + kirchensteuerMonat;
+
+
+        // ========================================
         // ERGEBNIS AUSGEBEN
         // ========================================
+
+        System.out.println("\n" + "=".repeat(70));
+        System.out.println("STEUERN (Jahr " + jahr + ")");
+        System.out.println("=".repeat(70));
+
+        //zVE berechnen für die Anzeige
+        double bruttoJahr = brutto * 12;
+        double sozialabgabenJahr = sozialabgabenGesamt * 12;
+        double zvEJahr = bruttoJahr - sozialabgabenJahr - 1230 - 36;
+
+        System.out.println("\nZu versteuerndes Einkommen (zvE):");
+        System.out.println("  Brutto (Jahr):             " + String.format("%,10.2f €", bruttoJahr));
+        System.out.println("  - Sozialabgaben:           " + String.format("%,10.2f €", sozialabgabenJahr));
+        System.out.println("  - Werbungskosten:          " + String.format("%,10.2f €", 1230.0));
+        System.out.println("  - Sonderausgaben:          " + String.format("%,10.2f €", 36.0));
+        System.out.println("  " + "-".repeat(68));
+        System.out.println("  = zvE (Jahr):              " + String.format("%,10.2f €", zvEJahr));
+
+        System.out.println("\nLohnsteuer (§32a EStG):");
+        System.out.println("  Lohnsteuer (Jahr):         " + String.format("%,10.2f €", lohnsteuerJahr));
+        System.out.println("  Lohnsteuer (Monat):        " + String.format("%,10.2f €", lohnsteuerMonat));
+
+        System.out.println("\nKirchensteuer:");
+        System.out.println("  Bundesland:                " + gewähltesBundesland);
+        System.out.println("  Kirchensteuersatz:         " + kirchensteuersatz + "%");
+        System.out.println("  Kirchenmitglied:           " + (istKirchenmitglied ? "Ja" : "Nein"));
+        System.out.println("  Kirchensteuer (Jahr):      " + String.format("%,10.2f €", kirchensteuerJahr));
+        System.out.println("  Kirchensteuer (Monat):     " + String.format("%,10.2f €", kirchensteuerMonat));
+
+        System.out.println("\n" + "-".repeat(70));
+        System.out.println("SUMME STEUERN:");
+        System.out.println("  Jahr:                      " + String.format("%,10.2f €", steuernGesamtJahr));
+        System.out.println("  Monat:                     " + String.format("%,10.2f €", steuernGesamtMonat));
+        System.out.println("=".repeat(70));
 
         System.out.println("\n" + "=".repeat(60));
         System.out.println("ERGEBNIS - Sozialabgaben (Jahr " + jahr +")");

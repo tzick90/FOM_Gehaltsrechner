@@ -1,0 +1,9 @@
+typ,wert,jahr,quelle,beschreibung
+grundfreibetrag,11784,2025,§32a Abs. 1 EStG (BGBl. 2023 I Nr. 293),Grundfreibetrag - steuerfrei
+zone1_ende,16573,2025,§32a Abs. 1 Nr. 1 EStG,Ende Progressionszone 1 (bis 23.97%)
+zone2_ende,66760,2025,§32a Abs. 1 Nr. 2 EStG,Ende Progressionszone 2 (bis 42%)
+zone3_ende,277825,2025,§32a Abs. 1 Nr. 3 EStG,Beginn Reichensteuer (45%)
+grundfreibetrag,12096,2026,§32a Abs. 1 EStG (BGBl. 2024 I Nr. 294),Grundfreibetrag - steuerfrei
+zone1_ende,17005,2026,§32a Abs. 1 Nr. 1 NrEStG,Ende Progressionszone 1 (bis 23.97%)
+zone2_ende,66760,2026,§32a Abs. 1 Nr. 2 EStG,Ende Progressionszone 2 (bis 42%)
+zone3_ende,277825,2026,§32a Abs. 1 Nr. 3 EStG,Beginn Reichensteuer (45%)

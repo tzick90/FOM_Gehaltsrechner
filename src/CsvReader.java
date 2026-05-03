@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.rmi.ServerError;
+import java.sql.SQLOutput;
 import java.sql.SQLSyntaxErrorException;
 import java.util.HashMap;
 import java.util.Map;
@@ -148,5 +149,105 @@ public class CsvReader {
 
         return daten;
     }
+
+    /*
+     * Innere Klasse für Bundesland-Informationen
+     */
+
+    public static class BundeslandInfo {
+        private double kirchensteuer;
+        private String region; // "West" oder "Ost"
+
+        public BundeslandInfo(double kirchensteuer, String region) {
+            this.kirchensteuer = kirchensteuer;
+            this.region = region;
+        }
+
+        public double getKirchensteuer() {
+            return kirchensteuer;
+        }
+
+        public String getRegion() {
+            return region;
+        }
+
+        public boolean istOst() {
+            return "ost".equalsIgnoreCase(region);
+        }
+    }
+
+    /**
+     * Liest Bundesländer-CSV mit Jahr-Filter
+     * Format: bundesland,jahr,kirchensteuer,region
+     *
+     * @param dateipfad Pfad zur CSV-Datei
+     * @param jahr Jahr zum Filtern (z.B. 2025)
+     * @return HashMap mit Bundesland -> BundeslandInfo
+     * @throws IOException wenn Datei nicht gefunden
+     */
+
+    public static Map<String, BundeslandInfo> leseBundeslaenderMitJahr(
+            String dateipfad,
+            int jahr
+    ) throws IOException {
+
+        Map<String, BundeslandInfo> daten = new HashMap<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(dateipfad))) {
+
+            // Header überspringen
+            String header = br.readLine();
+
+            String zeile;
+            while ((zeile = br.readLine()) != null) {
+
+                if (zeile.trim().isEmpty()) {
+                    continue;
+                }
+
+                String[] teile = zeile.split(",");
+
+                if (teile.length < 4) {
+                    System.err.println("Überspringe ungültige Zeile: " + zeile);
+                    continue;
+                }
+
+                //Spalte 0: Bundesland
+                String bundesland = teile[0].trim();
+
+                //Spalte 1: Jahr
+                int zeilenJahr;
+                try {
+                    zeilenJahr = Integer.parseInt(teile[1].trim());
+                } catch (NumberFormatException e) {
+                    System.err.println("Ungültiges Jahr in Zeile: " + zeile);
+                    continue;
+                }
+
+                // Jahr-Filter
+                if (zeilenJahr != jahr) {
+                    continue;
+                }
+
+                // Spalte 2: Kirchensteuer
+                String kirchensteuerStr = teile[2].trim();
+
+                //Spalte 3: Region
+                String region = teile[3].trim();
+
+                try {
+                    double kirchensteuer = Double.parseDouble(kirchensteuerStr);
+                    BundeslandInfo info = new BundeslandInfo(kirchensteuer, region);
+                    daten.put(bundesland, info);
+                } catch (NumberFormatException e) {
+                    System.err.println("Ungültige Zahl in Zeile: " + zeile);
+                }
+            }
+        }
+
+        return daten;
+
+    }
+
 
 }  // ← Klasse endet hier
