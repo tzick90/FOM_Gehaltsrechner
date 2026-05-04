@@ -1,7 +1,7 @@
-typ,jahr,wert,beschreibung
-lohnsteuer_klasse_1,20.0,Lohnsteuer Steuerklasse I (vereinfacht)
-lohnsteuer_klasse_3,15.0,Lohnsteuer Steuerklasse III (vereinfacht)
-lohnsteuer_klasse_4,18.0,Lohnsteuer Steuerklasse IV (vereinfacht)
-solidaritaetszuschlag,5.5,Solidaritätszuschlag (5,5% der Lohnsteuer)
-kirchensteuer_8,8.0,Kirchensteuer 8 Prozent (z.B. Baden-Württemberg Bayern)
-kirchensteuer_9,9.0,Kirchensteuer 9 Prozent (z.B. restliche Bundesländer)
+typ,jahr,wert,quelle,beschreibung
+solidaritaetszuschlag_satz,2025,5.5,§4 SolZG,Soli-Satz in Prozent der Lohnsteuer
+solidaritaetszuschlag_freigrenze,2025,17543,§3 SolZG,Soli Freigrenze (Jahres-Lohnsteuer in EUR)
+solidaritaetszuschlag_obergrenze,2025,33183,§3 SolZG,Soli Obergrenze Gleitzone (Jahres-Lohnsteuer in EUR)
+solidaritaetszuschlag_satz,2026,5.5,§4 SolZG,Soli-Satz in Prozent der Lohnsteuer
+solidaritaetszuschlag_freigrenze,2026,17543,§3 SolZG,Soli Freigrenze (Jahres-Lohnsteuer in EUR)
+solidaritaetszuschlag_obergrenze,2026,33183,§3 SolZG,Soli Obergrenze Gleitzone (Jahres-Lohnsteuer in EUR)

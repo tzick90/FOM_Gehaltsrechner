@@ -47,15 +47,12 @@ public class CsvReader {
                 }
 
                 // Spalte 0: Typ
-                String typ = teile[0].trim();
+                String typ = teile[0].trim(); //passt
 
-                // Spalte 1: Wert
-                String wertStr = teile[1].trim();
-
-                // Spalte 2: Jahr
+                // Spalte 1: Jahr
                 int zeilenJahr;
                 try {
-                    zeilenJahr = Integer.parseInt(teile[2].trim());
+                    zeilenJahr = Integer.parseInt(teile[1].trim());
                 } catch (NumberFormatException e) {
                     System.err.println("Ungültiges Jahr in Zeile: " + zeile);
                     continue;
@@ -66,6 +63,9 @@ public class CsvReader {
                     continue; // Zeile überspringen
                 }
 
+                // Spalte 2: Wert
+                String wertStr = teile[2].trim();
+
                 // Wert parsen
                 try {
                     double wert = Double.parseDouble(wertStr);
@@ -73,10 +73,6 @@ public class CsvReader {
                 } catch (NumberFormatException e) {
                     System.err.println("Ungültige Zahl in Zeile: " + zeile + " (Wert: " + wertStr + ")");
                 }
-
-
-
-
             }
         }
 

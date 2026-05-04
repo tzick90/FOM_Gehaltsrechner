@@ -10,10 +10,18 @@ public class Main {
         Map<String, Abgabenrechner.KrankenkassenInfo> krankenkassen;
         Map<String, Double> einkommensteuerGrenzen;
         Map<String, CsvReader.BundeslandInfo> bundeslaender;
+        Map<String, Double> pauschalen;
+        Map<String, Double> steuersaetze;
 
+        int steuerklasse;
         int anzahlKinder;  // ← NEU statt boolean hatKinder
         String gewähltesBundesland;
         boolean istKirchenmitglied;
+
+        //int auswahl;
+
+
+
 
         jahr = 2026;
         try {
@@ -28,6 +36,12 @@ public class Main {
 
             // Bundesländer laden
             bundeslaender = CsvReader.leseBundeslaenderMitJahr("config/Bundesland_und_Kirchensteuer.csv", jahr);
+
+            // Pauschalen laden
+            pauschalen = CsvReader.lesenMitJahr("config/pauschalen.csv", jahr);
+
+            // Steuersätze laden
+            steuersaetze = CsvReader.lesenMitJahr("config/steuer_saetze.csv", jahr);
 
             System.out.println("✓ CSVs erfolgreich geladen!");
 
@@ -47,6 +61,25 @@ public class Main {
         double pvSatzGesamt = svSaetze.get("pflegeversicherung_basis");  // 3.6%
         double pvZuschlag = svSaetze.get("pflegeversicherung_zuschlag_kinderlos");  // 0.6
         double pvAbschlag = svSaetze.get("pflegeversicherung_abschlag_pro_kind");   // 0.25
+
+        // Pauschalen
+        double werbekostenpauschale = pauschalen.get("werbungskosten");
+        double sonderausgaben = pauschalen.get("sonderausgaben");
+        double entlastungBasis = pauschalen.get("entlastungsbetrag_basis");
+        double entlastungWeiteres = pauschalen.get("entlastungsbetrag_weiteres");
+
+        // Einkommensteuer-Grenzen
+        double grundfreibetrag = einkommensteuerGrenzen.get("grundfreibetrag");
+        double zone1Ende = einkommensteuerGrenzen.get("zone1_ende");
+        double zone2Ende = einkommensteuerGrenzen.get("zone2_ende");
+        double zone3Ende = einkommensteuerGrenzen.get("zone3_ende");
+
+        // Soli-Werte
+        double soliSatz = steuersaetze.get("solidaritaetszuschlag_satz");
+        double soliFreigrenze = steuersaetze.get("solidaritaetszuschlag_freigrenze");
+        double soliObergrenze = steuersaetze.get("solidaritaetszuschlag_obergrenze");
+
+
 
         System.out.println("\nVerfügbare Krankenkassen:");
         System.out.println("==========================");
@@ -76,6 +109,24 @@ public class Main {
         //Bruttogehalt
         System.out.print("\nBruttogehalt (monatlich) in €: ");
         double brutto = scanner.nextDouble();
+
+        // Steuerklasse wählen
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("STEUERKLASSE");
+        System.out.println("=".repeat(60));
+        System.out.println("1. I   - Ledig, geschieden, verwitwet");
+        System.out.println("2. II  - Alleinerziehend mit Kind(ern)");
+        System.out.println("3. III - Verheiratet (Partner hat V)");
+        System.out.println("4. IV  - Verheiratet (beide berufstätig)");
+        System.out.println("5. V   - Verheiratet (Partner hat III)");
+        System.out.println("6. VI  - Zweitjob/Nebenjob");
+
+        System.out.print("\nWählen Sie Ihre Steuerklasse (1-6): ");
+        steuerklasse = scanner.nextInt();
+
+        String[] steuerklassenNamen = {"I", "II", "III", "IV", "V", "VI"};
+        System.out.println("✓ Gewählt: Steuerklasse " + steuerklassenNamen[steuerklasse - 1]);
+
 
         //Alter User
         System.out.print("\nBitte Alter eingeben:");
@@ -168,24 +219,100 @@ public class Main {
         // ========================================
 
         // Einkommensteuer-Grenzen laden
-        double grundfreibetrag = einkommensteuerGrenzen.get("grundfreibetrag");
-        double zone1Ende = einkommensteuerGrenzen.get("zone1_ende");
-        double zone2Ende = einkommensteuerGrenzen.get("zone2_ende");
-        double zone3Ende = einkommensteuerGrenzen.get("zone3_ende");
+        //double grundfreibetrag = einkommensteuerGrenzen.get("grundfreibetrag");
+        //double zone1Ende = einkommensteuerGrenzen.get("zone1_ende");
+        //double zone2Ende = einkommensteuerGrenzen.get("zone2_ende");
+        //double zone3Ende = einkommensteuerGrenzen.get("zone3_ende");
 
         // Lohnsteuer berechnen (nach §32a EStG) - JAHR
         // Hier wird sozialabgabenGesamt übergeben!
-        double lohnsteuerJahr = Gehaltsrechner.berechneLohnsteuerJahr(
-                brutto,
-                sozialabgabenGesamt,
-                grundfreibetrag,
-                zone1Ende,
-                zone2Ende,
-                zone3Ende,
-                jahr
-        );
+        double lohnsteuerJahr;
 
+        switch (steuerklasse) {
+            case 1:  // Klasse I
+            case 4:  // Klasse IV (gleich wie I)
+                lohnsteuerJahr = Gehaltsrechner.berechneLohnsteuerJahr(
+                        brutto,
+                        sozialabgabenGesamt,
+                        werbekostenpauschale,
+                        sonderausgaben,
+                        grundfreibetrag,
+                        zone1Ende,
+                        zone2Ende,
+                        zone3Ende,
+                        jahr
+                );
+                break;
+
+            case 2:  // Klasse II (Alleinerziehend)
+                lohnsteuerJahr = Gehaltsrechner.berechneLohnsteuerKlasseII(
+                        brutto,
+                        sozialabgabenGesamt,
+                        werbekostenpauschale,
+                        sonderausgaben,
+                        entlastungBasis,
+                        entlastungWeiteres,
+                        anzahlKinder,
+                        grundfreibetrag,
+                        zone1Ende,
+                        zone2Ende,
+                        zone3Ende,
+                        jahr
+                );
+                break;
+
+            case 3:  // Klasse III (Ehegattensplitting)
+                lohnsteuerJahr = Gehaltsrechner.berechneLohnsteuerKlasseIII(
+                        brutto,
+                        sozialabgabenGesamt,
+                        werbekostenpauschale,
+                        sonderausgaben,
+                        grundfreibetrag,
+                        zone1Ende,
+                        zone2Ende,
+                        zone3Ende,
+                        jahr
+                );
+                break;
+
+            case 5:  // Klasse V
+                lohnsteuerJahr = Gehaltsrechner.berechneLohnsteuerKlasseV(
+                        brutto,
+                        sozialabgabenGesamt,
+                        werbekostenpauschale,
+                        sonderausgaben,
+                        zone1Ende,
+                        zone2Ende,
+                        zone3Ende,
+                        jahr
+                );
+                break;
+
+            case 6:  // Klasse VI (Zweitjob)
+                lohnsteuerJahr = Gehaltsrechner.berechneLohnsteuerKlasseVI(
+                        brutto,
+                        sozialabgabenGesamt,
+                        zone1Ende,
+                        zone2Ende,
+                        zone3Ende,
+                        jahr
+                );
+                break;
+
+            default:
+                System.err.println("Ungültige Steuerklasse!");
+                return;
+        }
         double lohnsteuerMonat = lohnsteuerJahr / 12;
+
+        // Soli berechnen
+        double soliJahr = Gehaltsrechner.berechneSolidaritaetszuschlag(
+                lohnsteuerJahr,
+                soliSatz,
+                soliFreigrenze,
+                soliObergrenze
+        );
+        double soliMonat = soliJahr / 12;
 
         // Kirchensteuer berechnen - JAHR
         CsvReader.BundeslandInfo blInfo = bundeslaender.get(gewähltesBundesland);
@@ -213,19 +340,49 @@ public class Main {
         //zVE berechnen für die Anzeige
         double bruttoJahr = brutto * 12;
         double sozialabgabenJahr = sozialabgabenGesamt * 12;
-        double zvEJahr = bruttoJahr - sozialabgabenJahr - 1230 - 36;
+        double zvEJahr = bruttoJahr
+                - sozialabgabenJahr
+                - werbekostenpauschale
+                - sonderausgaben;
+
+        // bei Klasse II: Entlastungsbetrag abziehen
+        double entlastungsbetrag = 0;
+        if (steuerklasse == 2 && anzahlKinder >= 1) {
+            entlastungsbetrag = entlastungBasis;
+            if (anzahlKinder > 1) {
+                entlastungsbetrag += (anzahlKinder -1) * entlastungWeiteres;
+            }
+        }
+
+        // Entlastungsbetrag von zvE abziehen  ← NEU!
+        zvEJahr -= entlastungsbetrag;
 
         System.out.println("\nZu versteuerndes Einkommen (zvE):");
         System.out.println("  Brutto (Jahr):             " + String.format("%,10.2f €", bruttoJahr));
         System.out.println("  - Sozialabgaben:           " + String.format("%,10.2f €", sozialabgabenJahr));
-        System.out.println("  - Werbungskosten:          " + String.format("%,10.2f €", 1230.0));
-        System.out.println("  - Sonderausgaben:          " + String.format("%,10.2f €", 36.0));
+        System.out.println("  - Werbungskosten:          " + String.format("%,10.2f €", werbekostenpauschale));
+        System.out.println("  - Sonderausgaben:          " + String.format("%,10.2f €", sonderausgaben));
+
+        if (steuerklasse == 2 && anzahlKinder >= 1) {
+            System.out.println("  - Entlastungsbetrag:       " + String.format("%,10.2f €", entlastungsbetrag));
+        }
+
         System.out.println("  " + "-".repeat(68));
         System.out.println("  = zvE (Jahr):              " + String.format("%,10.2f €", zvEJahr));
 
         System.out.println("\nLohnsteuer (§32a EStG):");
         System.out.println("  Lohnsteuer (Jahr):         " + String.format("%,10.2f €", lohnsteuerJahr));
         System.out.println("  Lohnsteuer (Monat):        " + String.format("%,10.2f €", lohnsteuerMonat));
+
+        System.out.println("  Soli-Satz:                 " + soliSatz + "%");
+        if (lohnsteuerJahr <= soliFreigrenze) {
+            System.out.println("  Status:                    Unter Freigrenze - keine Soli");
+        } else if (lohnsteuerJahr <= soliObergrenze) {
+            System.out.println("  Status:                    In Gleitzone");
+        }
+        System.out.println("  Soli (Jahr):               " + String.format("%,10.2f €", soliJahr));
+        System.out.println("  Soli (Monat):              " + String.format("%,10.2f €", soliMonat));
+
 
         System.out.println("\nKirchensteuer:");
         System.out.println("  Bundesland:                " + gewähltesBundesland);
@@ -283,6 +440,22 @@ public class Main {
         System.out.println("\n" + "=".repeat(60));
         System.out.println("SUMME SOZIALABGABEN:       " + String.format("%8.2f €", sozialabgabenGesamt));
         System.out.println("=".repeat(60));
+
+        // ========================================
+        // NETTO BERECHNEN
+        // ========================================
+
+        double netto = brutto - sozialabgabenGesamt - steuernGesamtMonat;
+
+        System.out.println("\n" + "=".repeat(70));
+        System.out.println("NETTO-GEHALT");
+        System.out.println("=".repeat(70));
+        System.out.println("  Bruttogehalt:              " + String.format("%,10.2f €", brutto));
+        System.out.println("  - Sozialabgaben:           " + String.format("%,10.2f €", sozialabgabenGesamt));
+        System.out.println("  - Steuern:                 " + String.format("%,10.2f €", steuernGesamtMonat));
+        System.out.println("  " + "-".repeat(68));
+        System.out.println("  = NETTO:                   " + String.format("%,10.2f €", netto));
+        System.out.println("=".repeat(70));
 
         scanner.close();
     }

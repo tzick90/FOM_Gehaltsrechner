@@ -1,0 +1,9 @@
+typ,jahr,wert,quelle,beschreibung
+werbungskosten,2025,1230,§9a Satz 1 Nr. 1a EStG,Werbungskostenpauschale Arbeitnehmer
+sonderausgaben,2025,36,§10c Abs. 1 EStG,Sonderausgaben-Pauschbetrag
+entlastungsbetrag_basis,2025,4260,§24b Abs. 1 EStG,Entlastungsbetrag Alleinerziehende (1. Kind)
+entlastungsbetrag_weiteres,2025,240,§24b Abs. 2 EStG,Entlastungsbetrag je weiteres Kind
+werbungskosten,2026,1230,§9a Satz 1 Nr. 1a EStG,Werbungskostenpauschale Arbeitnehmer
+sonderausgaben,2026,36,§10c Abs. 1 EStG,Sonderausgaben-Pauschbetrag
+entlastungsbetrag_basis,2026,4260,§24b Abs. 1 EStG,Entlastungsbetrag Alleinerziehende (1. Kind)
+entlastungsbetrag_weiteres,2026,240,§24b Abs. 2 EStG,Entlastungsbetrag je weiteres Kind
