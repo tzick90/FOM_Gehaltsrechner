@@ -1,6 +1,9 @@
 import java.io.IOException;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.HashMap;
+import java.util.List;
+
 
 public class Main {
     public static void main(String[] args) {
@@ -17,6 +20,11 @@ public class Main {
         int anzahlKinder;  // ← NEU statt boolean hatKinder
         String gewähltesBundesland;
         boolean istKirchenmitglied;
+
+        String gewählteKK;
+        //String gewähltesBundesland;
+
+        Scanner scanner = new Scanner(System.in);
 
         //int auswahl;
 
@@ -81,30 +89,65 @@ public class Main {
 
 
 
-        System.out.println("\nVerfügbare Krankenkassen:");
-        System.out.println("==========================");
+        // ========================================
+        // KRANKENKASSE EINGEBEN (String-basiert)
+        // ========================================
 
-        int i = 1;
-        // Schleife über krankenkassen.keySet()
-        for (String kkName: krankenkassen.keySet()) {
-            Abgabenrechner.KrankenkassenInfo info = krankenkassen.get(kkName);
-            System.out.println(i + ". " + kkName +
-                    " (Gesamt: " + info.getGesamtbeitrag() + "%, " +
-                    "Zusatz: " + info.getZusatzbeitrag() + "%)");
-            i++;
+        // Häufigste Abkürzungen manuell
+        Map<String, String> kkAbkürzungen = new HashMap<>();
+        kkAbkürzungen.put("tk", "Techniker Krankenkasse");
+        kkAbkürzungen.put("dak", "DAK-Gesundheit");
+        kkAbkürzungen.put("barmer", "BARMER");
+        kkAbkürzungen.put("aok", "AOK");
+        kkAbkürzungen.put("ikk", "IKK");
+        kkAbkürzungen.put("bkk", "BKK");
+        kkAbkürzungen.put("hkk", "hkk");
 
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("KRANKENKASSE");
+        System.out.println("=".repeat(60));
+        System.out.println("Eingabe: z.B. 'TK', 'DAK', 'AOK Bayern', 'hkk'");
+        System.out.println("Oder '?' für Liste aller Krankenkassen");
+
+        while (true) {
+            System.out.print("\nKrankenkasse: ");
+            // scanner.nextLine(); // Buffer leeren
+            String eingabe = scanner.nextLine().trim();
+
+            // Liste anzeigen
+            if (eingabe.equals("?")) {
+                System.out.println("\nVerfügbare Krankenkassen:");
+                int i = 1;
+                for (String kk : krankenkassen.keySet()) {
+                    Abgabenrechner.KrankenkassenInfo info = krankenkassen.get(kk);
+                    System.out.println(i + ". " + kk +
+                            " (Gesamt: " + info.getGesamtbeitrag() + "%, " +
+                            "Zusatz: " + info.getZusatzbeitrag() + "%)");
+                    i++;
+                }
+                continue;
+            }
+
+            // Fuzzy-Match
+            gewählteKK = FuzzyMatcher.finde(eingabe, krankenkassen, kkAbkürzungen);
+
+            if (gewählteKK != null) {
+                System.out.println("✓ Gefunden: " + gewählteKK);
+                break;
+            } else {
+                // Vorschläge geben
+                List<String> vorschläge = FuzzyMatcher.gibVorschläge(eingabe, krankenkassen, 3);
+                if (!vorschläge.isEmpty()) {
+                    System.out.println("✗ Nicht gefunden. Meinten Sie:");
+                    for (String v : vorschläge) {
+                        System.out.println("  - " + v);
+                    }
+                } else {
+                    System.out.println("✗ Nicht gefunden.");
+                }
+                System.out.println("Oder '?' für vollständige Liste.");
+            }
         }
-
-        // User-Eingabe
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("\nWählen Sie eine Krankenkasse (1-" + krankenkassen.size() + "):");
-        int auswahl = scanner.nextInt();
-
-        //Deklariere die Variable
-        String[] kkNamen = krankenkassen.keySet().toArray(new String[0]);
-        String gewählteKK = kkNamen[auswahl -1];
-
-        System.out.println("✓ Gewählt: " + gewählteKK);
 
         //Bruttogehalt
         System.out.print("\nBruttogehalt (monatlich) in €: ");
@@ -137,26 +180,73 @@ public class Main {
         anzahlKinder = scanner.nextInt();
 
         // Bundesland auswählen:
-        System.out.println("\nVerfügbare Bundesländer:");
+        // ========================================
+        // BUNDESLAND EINGEBEN (String-basiert)
+        // ========================================
+
+        // Offizielle Kürzel
+        Map<String, String> blAbkürzungen = Map.ofEntries(
+                Map.entry("bw", "Baden-Württemberg"),
+                Map.entry("by", "Bayern"),
+                Map.entry("be", "Berlin"),
+                Map.entry("bb", "Brandenburg"),
+                Map.entry("hb", "Bremen"),
+                Map.entry("hh", "Hamburg"),
+                Map.entry("he", "Hessen"),
+                Map.entry("mv", "Mecklenburg-Vorpommern"),
+                Map.entry("ni", "Niedersachsen"),
+                Map.entry("nrw", "Nordrhein-Westfalen"),
+                Map.entry("rp", "Rheinland-Pfalz"),
+                Map.entry("sl", "Saarland"),
+                Map.entry("sn", "Sachsen"),
+                Map.entry("st", "Sachsen-Anhalt"),
+                Map.entry("sh", "Schleswig-Holstein"),
+                Map.entry("th", "Thüringen")
+        );
+
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("BUNDESLAND");
         System.out.println("=".repeat(60));
+        System.out.println("Eingabe: z.B. 'Bayern', 'BW', 'NRW'");
+        System.out.println("Oder '?' für Liste");
 
-        int i_1 = 1;
-        for (String blName : bundeslaender.keySet()) {
-            CsvReader.BundeslandInfo blInfo = bundeslaender.get(blName);
-            System.out.println(i_1 + ". " + blName +
-                    " (Kirchensteuer: " + blInfo.getKirchensteuer() + "%, " +
-                    "Region: " + blInfo.getRegion() + ")");
-            i_1++;
+        while (true) {
+            System.out.print("\nBundesland: ");
+            String eingabe = scanner.nextLine().trim();
+
+            // Liste anzeigen
+            if (eingabe.equals("?")) {
+                System.out.println("\nVerfügbare Bundesländer:");
+                int i = 1;
+                for (String bl : bundeslaender.keySet()) {
+                    CsvReader.BundeslandInfo blInfo = bundeslaender.get(bl);
+                    System.out.println(i + ". " + bl +
+                            " (Kirchensteuer: " + blInfo.getKirchensteuer() + "%)");
+                    i++;
+                }
+                continue;
+            }
+
+            // Fuzzy-Match
+            gewähltesBundesland = FuzzyMatcher.finde(eingabe, bundeslaender, blAbkürzungen);
+
+            if (gewähltesBundesland != null) {
+                System.out.println("✓ Gefunden: " + gewähltesBundesland);
+                break;
+            } else {
+                // Vorschläge geben
+                List<String> vorschläge = FuzzyMatcher.gibVorschläge(eingabe, bundeslaender, 3);
+                if (!vorschläge.isEmpty()) {
+                    System.out.println("✗ Nicht gefunden. Meinten Sie:");
+                    for (String v : vorschläge) {
+                        System.out.println("  - " + v);
+                    }
+                } else {
+                    System.out.println("✗ Nicht gefunden.");
+                }
+                System.out.println("Oder '?' für vollständige Liste.");
+            }
         }
-
-        System.out.print("\nWählen Sie ein Bundesland (1-" + bundeslaender.size() + "): ");
-        int blAuswahl = scanner.nextInt();
-
-        // Erstellen eines Arrays aus Map-Key für Index-Zugriff
-        String[] blNamen = bundeslaender.keySet().toArray(new String[0]);
-        gewähltesBundesland = blNamen[blAuswahl -1];
-
-        System.out.println("✓ Gewählt: " + gewähltesBundesland);
 
 
         // Kirchenmitgliedschaft abfragen
