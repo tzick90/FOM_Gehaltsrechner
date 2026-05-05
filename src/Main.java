@@ -111,7 +111,6 @@ public class Main {
 
         while (true) {
             System.out.print("\nKrankenkasse: ");
-            // scanner.nextLine(); // Buffer leeren
             String eingabe = scanner.nextLine().trim();
 
             // Liste anzeigen
@@ -128,14 +127,11 @@ public class Main {
                 continue;
             }
 
-            // Fuzzy-Match
-            gewählteKK = FuzzyMatcher.finde(eingabe, krankenkassen, kkAbkürzungen);
+            // Fuzzy-Match - ALLE Treffer finden
+            List<String> treffer = FuzzyMatcher.findeAlle(eingabe, krankenkassen, kkAbkürzungen);
 
-            if (gewählteKK != null) {
-                System.out.println("✓ Gefunden: " + gewählteKK);
-                break;
-            } else {
-                // Vorschläge geben
+            if (treffer.isEmpty()) {
+                // Nichts gefunden - Vorschläge geben
                 List<String> vorschläge = FuzzyMatcher.gibVorschläge(eingabe, krankenkassen, 3);
                 if (!vorschläge.isEmpty()) {
                     System.out.println("✗ Nicht gefunden. Meinten Sie:");
@@ -146,6 +142,34 @@ public class Main {
                     System.out.println("✗ Nicht gefunden.");
                 }
                 System.out.println("Oder '?' für vollständige Liste.");
+
+            } else if (treffer.size() == 1) {
+                // Genau ein Treffer - direkt verwenden
+                gewählteKK = treffer.get(0);
+                System.out.println("✓ Gefunden: " + gewählteKK);
+                break;
+
+            } else {
+                // Mehrere Treffer - User wählen lassen
+                System.out.println("\nMehrere Treffer gefunden (" + treffer.size() + "):");
+                for (int i = 0; i < treffer.size(); i++) {
+                    Abgabenrechner.KrankenkassenInfo info = krankenkassen.get(treffer.get(i));
+                    System.out.println((i + 1) + ". " + treffer.get(i) +
+                            " (Gesamt: " + info.getGesamtbeitrag() + "%, " +
+                            "Zusatz: " + info.getZusatzbeitrag() + "%)");
+                }
+
+                System.out.print("\nWählen Sie (1-" + treffer.size() + ") oder 0 für neue Eingabe: ");
+                int auswahl = scanner.nextInt();
+                scanner.nextLine();  // Buffer leeren
+
+                if (auswahl > 0 && auswahl <= treffer.size()) {
+                    gewählteKK = treffer.get(auswahl - 1);
+                    System.out.println("✓ Gewählt: " + gewählteKK);
+                    break;
+                } else {
+                    System.out.println("→ Bitte erneut eingeben.");
+                }
             }
         }
 
@@ -227,14 +251,11 @@ public class Main {
                 continue;
             }
 
-            // Fuzzy-Match
-            gewähltesBundesland = FuzzyMatcher.finde(eingabe, bundeslaender, blAbkürzungen);
+            // Fuzzy-Match - ALLE Treffer finden
+            List<String> treffer = FuzzyMatcher.findeAlle(eingabe, bundeslaender, blAbkürzungen);
 
-            if (gewähltesBundesland != null) {
-                System.out.println("✓ Gefunden: " + gewähltesBundesland);
-                break;
-            } else {
-                // Vorschläge geben
+            if (treffer.isEmpty()) {
+                // Nichts gefunden - Vorschläge
                 List<String> vorschläge = FuzzyMatcher.gibVorschläge(eingabe, bundeslaender, 3);
                 if (!vorschläge.isEmpty()) {
                     System.out.println("✗ Nicht gefunden. Meinten Sie:");
@@ -245,6 +266,31 @@ public class Main {
                     System.out.println("✗ Nicht gefunden.");
                 }
                 System.out.println("Oder '?' für vollständige Liste.");
+
+            } else if (treffer.size() == 1) {
+                // Genau ein Treffer
+                gewähltesBundesland = treffer.get(0);
+                System.out.println("✓ Gefunden: " + gewähltesBundesland);
+                break;
+
+            } else {
+                // Mehrere Treffer (unwahrscheinlich bei Bundesländern)
+                System.out.println("\nMehrere Treffer gefunden:");
+                for (int i = 0; i < treffer.size(); i++) {
+                    System.out.println((i + 1) + ". " + treffer.get(i));
+                }
+
+                System.out.print("\nWählen Sie (1-" + treffer.size() + ") oder 0 für neue Eingabe: ");
+                int auswahl = scanner.nextInt();
+                scanner.nextLine();  // Buffer leeren
+
+                if (auswahl > 0 && auswahl <= treffer.size()) {
+                    gewähltesBundesland = treffer.get(auswahl - 1);
+                    System.out.println("✓ Gewählt: " + gewähltesBundesland);
+                    break;
+                } else {
+                    System.out.println("→ Bitte erneut eingeben.");
+                }
             }
         }
 

@@ -165,7 +165,65 @@ public class FuzzyMatcher {
 
             return abkürzungen;
         }
+
+        // Neue Methode: Finde alle passendes Key (nicht nur den ersten)
+
+    /**
+     * @param <T> Typ der Map-Values
+     * @param eingabe User-Eingabe
+     * @param daten Map mit möglichen Werten
+     * @param abkürzungen Optional: Map mit Abkürzungen
+     * @return Liste aller gefundenen Keys (leer wenn nichts gefunden)
+     */
+
+    public static <T> List<String> findeAlle(
+            String eingabe,
+            Map<String, T> daten,
+            Map<String, String> abkürzungen
+    ) {
+        List<String> treffer = new ArrayList<>();
+
+        if (eingabe == null || eingabe.trim().isEmpty()) {
+            return treffer;
+        }
+
+        eingabe = eingabe.toLowerCase().trim();
+
+        // 1. Exakte Übereinstimmung (case-insensitive)
+        for (String key : daten.keySet()) {
+            if (key.toLowerCase().equals(eingabe)) {
+                treffer.add(key);
+                return treffer;  // Bei exakter Übereinstimmung nur diesen zurückgeben
+            }
+        }
+
+        // 2. Abkürzungen auflösen
+        String aufgelöst = eingabe;
+        if (abkürzungen != null && abkürzungen.containsKey(eingabe)) {
+            aufgelöst = abkürzungen.get(eingabe).toLowerCase();
+        }
+
+        // 3. Substring-Match (Key enthält Eingabe) - ALLE sammeln
+        for (String key : daten.keySet()) {
+            if (key.toLowerCase().contains(aufgelöst)) {
+                treffer.add(key);
+            }
+        }
+
+        // 4. Falls nichts gefunden: Reverse Substring
+        if (treffer.isEmpty()) {
+            for (String key : daten.keySet()) {
+                if (aufgelöst.contains(key.toLowerCase())) {
+                    treffer.add(key);
+                }
+            }
+        }
+
+        return treffer;
     }
+
+}
+
 
 
 
