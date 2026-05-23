@@ -2,7 +2,7 @@ public class SteuerKonstanten {
     /*
     - Zentrale Verwaltung der steuerlichen Konstanzen
     - Diese Werte sind kurzfristig stabil (2024-2026), ändern sich aber
-      mittelfristig und sollten später über ein Settings-Tab in der GUI konfigurierbar sein.
+      mittelfristig und sollten später über ein Settings-Tab in der GUI.GUI konfigurierbar sein.
 
     - Quellen: EStG, BMF
      */
@@ -78,7 +78,7 @@ public class SteuerKonstanten {
 
         // TODO: Diese Klasse später durch Settings-System ersetzen:
         // - JSON-Konfigurationsdatei
-        // - Admin-GUI zum Anpassen
+        // - Admin-GUI.GUI zum Anpassen
         // - Versionierung der Konstanten
         // - Validierung der Werte
 
