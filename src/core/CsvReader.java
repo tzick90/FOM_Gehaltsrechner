@@ -1,9 +1,8 @@
+package core;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.rmi.ServerError;
-import java.sql.SQLOutput;
-import java.sql.SQLSyntaxErrorException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -246,4 +245,4 @@ public class CsvReader {
     }
 
 
-}  // ← Klasse endet hier
+}
