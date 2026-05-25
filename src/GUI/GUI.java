@@ -6,9 +6,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.ItemEvent;
 import java.awt.Color;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
+import core.Abgabenrechner;
 import core.CsvReader;
 import core.CsvReader.BundeslandInfo;
 import util.FuzzyMatcher;
@@ -75,10 +77,25 @@ public class GUI {
             FiscalYearCurrentButton.setMnemonic(KeyEvent.VK_A);
             FiscalYearCurrentButton.setActionCommand("Aktuelles Fiskaljahr");
 
+
+            // adding Radio-Button to choose between monthly or anually salary calculation
+            JRadioButton MonthlyCalcButton = new JRadioButton("Monat");
+            MonthlyCalcButton.setMnemonic(KeyEvent.VK_M);
+            MonthlyCalcButton.setActionCommand("Monat");
+
+            JRadioButton YearlyCalcButton = new JRadioButton("Jahr");
+            YearlyCalcButton.setMnemonic(KeyEvent.VK_J);
+            YearlyCalcButton.setActionCommand("Jahr");
+
+
             // Grouping the RadioButtons
             ButtonGroup FiscalYearButtonsGroup = new ButtonGroup();
             FiscalYearButtonsGroup.add(FiscalYearPreviousButton);
             FiscalYearButtonsGroup.add(FiscalYearCurrentButton);
+
+            ButtonGroup SalaryValueButton = new ButtonGroup();
+            SalaryValueButton.add(MonthlyCalcButton);
+            SalaryValueButton.add(YearlyCalcButton);
 
 
 
@@ -91,13 +108,18 @@ public class GUI {
 
             JButton submitButton = new JButton("Berechnen");
 
-            int jahr = 2026;
+
+            // Field for Age input
+            JLabel ageLabel = new JLabel("Alter:");
+            JTextField AgeInputField = new JTextField();
+
+            int jahr = 2026; // TODO: Change with
 
             // Add FuzzyMatch for German-States
             Map<String, BundeslandInfo> bundeslaender;
             try {
                 bundeslaender = CsvReader.leseBundeslaenderMitJahr(
-                        "config/Bundesland_und_Kirchensteuer.csv", jahr);
+                        "config/Bundesland_und_Kirchensteuer.csv", jahr); // TODO: change with path from settings
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -170,6 +192,91 @@ public class GUI {
             });
 
 
+            // Add FuzzyMatch for health Insurances
+            Map<String, Abgabenrechner.KrankenkassenInfo> krankenkassen;
+            try {
+                krankenkassen = CsvReader.leseKrankenkassen("config/krankenkassen.csv");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            // Häufigste Abkürzungen manuell
+            Map<String, String> kkAbkürzungen = new HashMap<>();
+            kkAbkürzungen.put("tk", "Techniker Krankenkasse");
+            kkAbkürzungen.put("dak", "DAK-Gesundheit");
+            kkAbkürzungen.put("barmer", "BARMER");
+            kkAbkürzungen.put("aok", "AOK");
+            kkAbkürzungen.put("ikk", "IKK");
+            kkAbkürzungen.put("bkk", "BKK");
+            kkAbkürzungen.put("hkk", "hkk");
+
+            JLabel KrankenkassenLabel = new JLabel("Krankenkasse:");
+            JTextField KrankenkassenSuchfeld = new JTextField(15);
+
+            JComboBox<String> KrankenkassenDropdown =
+                    new JComboBox<>(krankenkassen.keySet().toArray(new String[0]));
+
+
+            KrankenkassenSuchfeld.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+                private void aktualisieren() {
+                    String eingabe = KrankenkassenSuchfeld.getText().trim();
+
+                    List<String> treffer = FuzzyMatcher.findeAlle(
+                            eingabe,
+                            krankenkassen,
+                            kkAbkürzungen
+                    );
+
+                    KrankenkassenDropdown.removeAllItems();
+
+                    if (eingabe.isEmpty()) {
+                        for (String kk : krankenkassen.keySet()) {
+                            KrankenkassenDropdown.addItem(kk);
+                        }
+                    } else {
+                        for (String kk : treffer) {
+                            KrankenkassenDropdown.addItem(kk);
+                        }
+                    }
+                    if (KrankenkassenDropdown.getItemCount() > 0) {
+                        KrankenkassenDropdown.setSelectedIndex(0);
+                    }
+                }
+                public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                    aktualisieren();
+                }
+
+                public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                    aktualisieren();
+                }
+
+                public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                    aktualisieren();
+                }
+            });
+
+            // Add field for input number of children
+            JLabel numberOfChildrenLabel = new JLabel("Anzahl Kinder:");
+            JTextField NumberOfChildrenField = new JTextField();
+
+
+            /*
+            STEUERKLASSE DROPDOWN
+             */
+
+            String[] steuerKlasse = {"I", "II", "III", "IV","V","VI"};
+            JLabel steuerKlasseLabel = new JLabel("Steuerklasse:");
+            JComboBox<String> SteuerKlasseDropdown = new JComboBox<>(steuerKlasse);
+
+
+            /*
+            Kirchenmitglied DROPDOWN
+             */
+
+            String[] kirchenMitgliedOptions = {"Nein", "Ja"};
+            JLabel kirchenMitglied = new JLabel("Kirchenmitglied:");
+            JComboBox<String> KirchenMitgliedDropdown = new JComboBox<>(kirchenMitgliedOptions);
+
 
 
             // Add components to left panel
@@ -180,6 +287,42 @@ public class GUI {
 
             gbc.gridwidth = 1; gbc.gridy++;
 
+            // ---- optische Trennlinie -----
+            gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 2;
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+            leftPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
+            // ---- optische Trennlinie ENDE -----
+
+            gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 2;
+            leftPanel.add(MonthlyCalcButton, gbc);
+            gbc.gridy++;
+            leftPanel.add(YearlyCalcButton, gbc);
+
+            // Placement of Salaryfield
+            gbc.gridy++; gbc.gridx = 0;
+            leftPanel.add(salaryLabel, gbc);
+            gbc.gridx = 1;
+            leftPanel.add(GrossSalaryField, gbc);
+
+            gbc.gridwidth = 1; gbc.gridy++;
+
+            // ---- optische Trennlinie -----
+            gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 2;
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+            leftPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
+            // ---- optische Trennlinie ENDE -----
+
+
+            gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 1;
+            leftPanel.add(steuerKlasseLabel, gbc);
+            gbc.gridx = 1;
+            leftPanel.add(SteuerKlasseDropdown, gbc);
+
+            gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 1;
+            leftPanel.add(kirchenMitglied, gbc);
+            gbc.gridx = 1;
+            leftPanel.add(KirchenMitgliedDropdown, gbc);
+
             gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 1;
             leftPanel.add(bundeslandLabel, gbc);
             gbc.gridx = 1;
@@ -188,10 +331,34 @@ public class GUI {
             gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 2;
             leftPanel.add(bundeslandDropdown, gbc);
 
-            gbc.gridy++; gbc.gridx = 0;
-            leftPanel.add(salaryLabel, gbc);
+            gbc.gridwidth = 1; gbc.gridy++;
+
+            // ---- optische Trennlinie -----
+            gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 2;
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+            leftPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
+            // ---- optische Trennlinie ENDE -----
+
+
+            gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 1;
+            leftPanel.add(KrankenkassenLabel, gbc);
             gbc.gridx = 1;
-            leftPanel.add(GrossSalaryField, gbc);
+            leftPanel.add(KrankenkassenSuchfeld, gbc);
+
+            gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 2;
+            leftPanel.add(KrankenkassenDropdown, gbc);
+
+            gbc.gridy++; gbc.gridx = 0;
+            leftPanel.add(ageLabel, gbc);
+            gbc.gridx = 1;
+            leftPanel.add(AgeInputField, gbc);
+
+            gbc.gridy++; gbc.gridx = 0;
+            leftPanel.add(numberOfChildrenLabel, gbc);
+            gbc.gridx = 1;
+            leftPanel.add(NumberOfChildrenField, gbc);
+
+
 
             gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 2;
             leftPanel.add(submitButton, gbc);
@@ -214,14 +381,30 @@ public class GUI {
             // ===== Event Handling =====
             submitButton.addActionListener(e -> {
                 String salary = GrossSalaryField.getText().trim();
+                String nKids = NumberOfChildrenField.getText().trim();
+                String chosenAge = AgeInputField.getText().trim();
+                String chosenState = bundeslandDropdown.getSelectedItem().toString().trim();
+                String chosenTaxClass = SteuerKlasseDropdown.getSelectedItem().toString().trim();
+                String churchMembership = KirchenMitgliedDropdown.getSelectedItem().toString().trim();
+                String chosenHealthInsurance = KrankenkassenDropdown.getSelectedItem().toString().trim();
                 String fiscalYear = FiscalYearPreviousButton.isSelected() ? "Letztes Fiskaljahr" :
                         FiscalYearCurrentButton.isSelected() ? "Aktuelles Fiskaljahr" : "Nicht ausgewählt";
+                String grossSalaryMode = MonthlyCalcButton.isSelected() ? "monatlich" :
+                        YearlyCalcButton.isSelected() ? "jährlich" : "Nicht ausgewählt";
 
                 if (salary.isEmpty()) {
                     JOptionPane.showMessageDialog(frame, "Bitte alle Felder ausfüllen.", "Fehler", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                outputArea.append("Gehalt: " + salary + ", Jahr: " + fiscalYear + "\n");
+                outputArea.append("Gehalt: " + salary + "\n"
+                        + "Jahr: " + fiscalYear + "\n"
+                        + "Anzahl Kinder: " + nKids + "\n"
+                        + "Alter: " + chosenAge + "\n"
+                        + "Bundesland: " + chosenState + "\n"
+                        + "Steuerklasse: " + chosenTaxClass + "\n"
+                        + "Ist Kirchenmitglied: " + churchMembership + "\n"
+                        + "Gewählte Krankenkasse: " + chosenHealthInsurance + "\n"
+                        + "Bruttolohn-Angabe: " + grossSalaryMode + "\n");
                 GrossSalaryField.setText("");
             });
 
