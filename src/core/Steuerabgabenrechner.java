@@ -1,4 +1,6 @@
-public class Gehaltsrechner {
+package core;
+
+public class Steuerabgabenrechner {
 
  /**
   * Verwenden einer inneren Klasse um die Steuerergebnisse zu sparen (Jahr + Monat)

@@ -1,3 +1,5 @@
+package core;
+
 public class SteuerKonstanten {
     /*
     - Zentrale Verwaltung der steuerlichen Konstanzen

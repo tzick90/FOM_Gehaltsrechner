@@ -1,6 +1,6 @@
 package core;
 
-public class Abgabenrechner {
+public class Sozialabgabenrechner {
 
     /**
      * Innere Klasse: Speichert Beitragsinformationen einer Krankenkasse

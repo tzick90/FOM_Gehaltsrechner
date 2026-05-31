@@ -3,19 +3,17 @@ package GUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.awt.event.ItemEvent;
-import java.awt.Color;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
-import core.Abgabenrechner;
+import core.Sozialabgabenrechner;
 import core.CsvReader;
 import core.CsvReader.BundeslandInfo;
-import util.FuzzyMatcher;
-
-import static core.CsvReader.leseBundeslaenderMitJahr;
+import core.FuzzyMatcher;
+import util.Abgabenrechner;
+import util.Ergebnis;
 
 public class GUI {
 
@@ -193,7 +191,7 @@ public class GUI {
 
 
             // Add FuzzyMatch for health Insurances
-            Map<String, Abgabenrechner.KrankenkassenInfo> krankenkassen;
+            Map<String, Sozialabgabenrechner.KrankenkassenInfo> krankenkassen;
             try {
                 krankenkassen = CsvReader.leseKrankenkassen("config/krankenkassen.csv");
             } catch (IOException e) {
@@ -380,6 +378,63 @@ public class GUI {
 
             // ===== Event Handling =====
             submitButton.addActionListener(e -> {
+                double salary = Double.parseDouble(GrossSalaryField.getText().trim());
+                int nKids = Integer.parseInt(NumberOfChildrenField.getText().trim());
+                int chosenAge = Integer.parseInt(AgeInputField.getText().trim());
+                String chosenState = bundeslandDropdown.getSelectedItem().toString().trim();
+                String chosenTaxClass = SteuerKlasseDropdown.getSelectedItem().toString().trim();
+                String churchMembership = KirchenMitgliedDropdown.getSelectedItem().toString().trim();
+                String chosenHealthInsurance = KrankenkassenDropdown.getSelectedItem().toString().trim();
+                String fiscalYear = FiscalYearPreviousButton.isSelected() ? "Letztes Fiskaljahr" :
+                        FiscalYearCurrentButton.isSelected() ? "Aktuelles Fiskaljahr" : "Nicht ausgewählt";
+                String grossSalaryMode = MonthlyCalcButton.isSelected() ? "monatlich" :
+                        YearlyCalcButton.isSelected() ? "jährlich" : "Nicht ausgewählt";
+
+
+                Ergebnis ergebnis = Abgabenrechner.berechneGehalt(
+                        salary,
+                        chosenTaxClass,
+                        churchMembership,
+                        chosenState,
+                        nKids,
+                        "2026",
+                        chosenHealthInsurance,
+                        chosenAge
+                );
+                outputArea.setText(
+                        "Bruttogehalt: "+ String.format("%.2f €",salary) + "\n"
+                       + "Lohnsteuer: " + "-" + String.format("%.2f €", ergebnis.getLohnsteuerMonat()) + "\n"
+                       + "Kirchsteuer: " + "-" + String.format("%.2f €", ergebnis.getKirchensteuerMonat()) + "\n"
+                       + "Soli: " + "-" + String.format("%.2f €", ergebnis.getSoliMonat()) + "\n"
+                       + "Zwischenergebnis: " + String.format("%.2f €", salary - (ergebnis.getLohnsteuerMonat() + ergebnis.getKirchensteuerMonat() + ergebnis.getSoliMonat())) + "\n"
+                       + "\n"
+                       + "\n"
+                       + "Sozialabgaben (Arbeitnehmer):" + "\n"
+                       + "KV-Abzug: " + "-" + String.format("%.2f €", ergebnis.getKvBeitrag()) + "\n"
+                       + "RV-Abzug: " + "-" + String.format("%.2f €", ergebnis.getRvBeitrag()) + "\n"
+                       + "AV-Abzug: " + "-" + String.format("%.2f €", ergebnis.getAvBeitrag()) + "\n"
+                       + "PV-Abzug: " + "-" + String.format("%.2f €", ergebnis.getPvBeitrag()) + "\n"
+                       + "Gesamtsumme Abgaben: " + String.format("%.2f €",
+                                ergebnis.getPvBeitrag()
+                                + ergebnis.getRvBeitrag()
+                                + ergebnis.getKvBeitrag()
+                                + ergebnis.getAvBeitrag()) + "\n"
+                       + "\n"
+                       + "\n"
+                       + "Nettogehalt: "+String.format("%.2f €", ergebnis.getNettoMonat())
+
+                );
+
+
+
+            });
+
+
+
+
+
+            /*
+            submitButton.addActionListener(e -> {
                 String salary = GrossSalaryField.getText().trim();
                 String nKids = NumberOfChildrenField.getText().trim();
                 String chosenAge = AgeInputField.getText().trim();
@@ -407,6 +462,11 @@ public class GUI {
                         + "Bruttolohn-Angabe: " + grossSalaryMode + "\n");
                 GrossSalaryField.setText("");
             });
+
+             */
+
+
+
 
             frame.setVisible(true);
         });

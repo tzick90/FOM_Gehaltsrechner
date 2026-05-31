@@ -1,6 +1,7 @@
-import core.Abgabenrechner;
+import core.Sozialabgabenrechner;
 import core.CsvReader;
-import util.FuzzyMatcher;
+import core.Steuerabgabenrechner;
+import core.FuzzyMatcher;
 
 import java.io.IOException;
 import java.util.Map;
@@ -14,7 +15,7 @@ public class Main {
         // ALLE Variablen am Anfang deklarieren
         int jahr;
         Map<String, Double> svSaetze;
-        Map<String, Abgabenrechner.KrankenkassenInfo> krankenkassen;
+        Map<String, Sozialabgabenrechner.KrankenkassenInfo> krankenkassen;
         Map<String, Double> einkommensteuerGrenzen;
         Map<String, CsvReader.BundeslandInfo> bundeslaender;
         Map<String, Double> pauschalen;
@@ -47,7 +48,7 @@ public class Main {
             einkommensteuerGrenzen = CsvReader.lesenMitJahr("config/einkommensteuer_grenzen.csv", jahr);
 
             // Bundesländer laden
-            bundeslaender = CsvReader.leseBundeslaenderMitJahr("config/Bundesland_und_Kirchensteuer.csv", jahr);
+            bundeslaender = CsvReader.leseBundeslaenderMitJahr("config/Bundesland_und_Kirchensteuer.csv", jahr); // Note:
 
             // Pauschalen laden
             pauschalen = CsvReader.lesenMitJahr("config/pauschalen.csv", jahr);
@@ -122,7 +123,7 @@ public class Main {
                 System.out.println("\nVerfügbare Krankenkassen:");
                 int i = 1;
                 for (String kk : krankenkassen.keySet()) {
-                    Abgabenrechner.KrankenkassenInfo info = krankenkassen.get(kk);
+                    Sozialabgabenrechner.KrankenkassenInfo info = krankenkassen.get(kk);
                     System.out.println(i + ". " + kk +
                             " (Gesamt: " + info.getGesamtbeitrag() + "%, " +
                             "Zusatz: " + info.getZusatzbeitrag() + "%)");
@@ -157,7 +158,7 @@ public class Main {
                 // Mehrere Treffer - User wählen lassen
                 System.out.println("\nMehrere Treffer gefunden (" + treffer.size() + "):");
                 for (int i = 0; i < treffer.size(); i++) {
-                    Abgabenrechner.KrankenkassenInfo info = krankenkassen.get(treffer.get(i));
+                    Sozialabgabenrechner.KrankenkassenInfo info = krankenkassen.get(treffer.get(i));
                     System.out.println((i + 1) + ". " + treffer.get(i) +
                             " (Gesamt: " + info.getGesamtbeitrag() + "%, " +
                             "Zusatz: " + info.getZusatzbeitrag() + "%)");
@@ -316,10 +317,10 @@ public class Main {
         // ========================================
 
         // 1. Krankenversicherung
-        Abgabenrechner.KrankenkassenInfo kkInfo = krankenkassen.get(gewählteKK);
+        Sozialabgabenrechner.KrankenkassenInfo kkInfo = krankenkassen.get(gewählteKK);
         double kvZusatz = kkInfo.getZusatzbeitrag();  // z.B. 2.69%
 
-        double kvBeitrag = Abgabenrechner.berechneKrankenversicherung(
+        double kvBeitrag = Sozialabgabenrechner.berechneKrankenversicherung(
                 brutto,
                 kvBasis,   // 14.6%
                 kvZusatz,  // z.B. 2.69%
@@ -327,21 +328,21 @@ public class Main {
         );
 
         // 2. Rentenversicherung
-        double rvBeitrag = Abgabenrechner.berechneRentenversicherung(
+        double rvBeitrag = Sozialabgabenrechner.berechneRentenversicherung(
                 brutto,
                 rvSatzGesamt,  // 18.6%
                 bbgRV
         );
 
         // 3. Arbeitslosenversicherung
-        double avBeitrag = Abgabenrechner.berechneArbeitslosenversicherung(
+        double avBeitrag = Sozialabgabenrechner.berechneArbeitslosenversicherung(
                 brutto,
                 avSatzGesamt,  // 2.6%
                 bbgRV
         );
 
         // 4. Pflegeversicherung
-        double pvBeitrag = Abgabenrechner.berechnePflegeversicherung(
+        double pvBeitrag = Sozialabgabenrechner.berechnePflegeversicherung(
                 brutto,
                 pvSatzGesamt,  // 3.6%
                 pvZuschlag,    // 0.6%
@@ -371,7 +372,7 @@ public class Main {
         switch (steuerklasse) {
             case 1:  // Klasse I
             case 4:  // Klasse IV (gleich wie I)
-                lohnsteuerJahr = Gehaltsrechner.berechneLohnsteuerJahr(
+                lohnsteuerJahr = Steuerabgabenrechner.berechneLohnsteuerJahr(
                         brutto,
                         sozialabgabenGesamt,
                         werbekostenpauschale,
@@ -385,7 +386,7 @@ public class Main {
                 break;
 
             case 2:  // Klasse II (Alleinerziehend)
-                lohnsteuerJahr = Gehaltsrechner.berechneLohnsteuerKlasseII(
+                lohnsteuerJahr = Steuerabgabenrechner.berechneLohnsteuerKlasseII(
                         brutto,
                         sozialabgabenGesamt,
                         werbekostenpauschale,
@@ -402,7 +403,7 @@ public class Main {
                 break;
 
             case 3:  // Klasse III (Ehegattensplitting)
-                lohnsteuerJahr = Gehaltsrechner.berechneLohnsteuerKlasseIII(
+                lohnsteuerJahr = Steuerabgabenrechner.berechneLohnsteuerKlasseIII(
                         brutto,
                         sozialabgabenGesamt,
                         werbekostenpauschale,
@@ -416,7 +417,7 @@ public class Main {
                 break;
 
             case 5:  // Klasse V
-                lohnsteuerJahr = Gehaltsrechner.berechneLohnsteuerKlasseV(
+                lohnsteuerJahr = Steuerabgabenrechner.berechneLohnsteuerKlasseV(
                         brutto,
                         sozialabgabenGesamt,
                         werbekostenpauschale,
@@ -429,7 +430,7 @@ public class Main {
                 break;
 
             case 6:  // Klasse VI (Zweitjob)
-                lohnsteuerJahr = Gehaltsrechner.berechneLohnsteuerKlasseVI(
+                lohnsteuerJahr = Steuerabgabenrechner.berechneLohnsteuerKlasseVI(
                         brutto,
                         sozialabgabenGesamt,
                         zone1Ende,
@@ -446,7 +447,7 @@ public class Main {
         double lohnsteuerMonat = lohnsteuerJahr / 12;
 
         // Soli berechnen
-        double soliJahr = Gehaltsrechner.berechneSolidaritaetszuschlag(
+        double soliJahr = Steuerabgabenrechner.berechneSolidaritaetszuschlag(
                 lohnsteuerJahr,
                 soliSatz,
                 soliFreigrenze,
@@ -457,7 +458,7 @@ public class Main {
         // Kirchensteuer berechnen - JAHR
         CsvReader.BundeslandInfo blInfo = bundeslaender.get(gewähltesBundesland);
         double kirchensteuersatz = blInfo.getKirchensteuer();
-        double kirchensteuerJahr = Gehaltsrechner.berechneKirchensteuerJahr(
+        double kirchensteuerJahr = Steuerabgabenrechner.berechneKirchensteuerJahr(
                 lohnsteuerJahr,
                 kirchensteuersatz,
                 istKirchenmitglied

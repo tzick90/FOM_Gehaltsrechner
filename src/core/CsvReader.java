@@ -87,9 +87,9 @@ public class CsvReader {
      * @return HashMap mit Krankenkasse -> KrankenkassenInfo
      * @throws IOException wenn Datei nicht gefunden
      */
-    public static Map<String, Abgabenrechner.KrankenkassenInfo> leseKrankenkassen(String dateipfad) throws IOException {
+    public static Map<String, Sozialabgabenrechner.KrankenkassenInfo> leseKrankenkassen(String dateipfad) throws IOException {
 
-        Map<String, Abgabenrechner.KrankenkassenInfo> daten = new HashMap<>();
+        Map<String, Sozialabgabenrechner.KrankenkassenInfo> daten = new HashMap<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(dateipfad))) {
 
@@ -129,8 +129,8 @@ public class CsvReader {
                     double zusatz = Double.parseDouble(zusatzStr);
 
                     // KrankenkassenInfo Objekt erstellen
-                    Abgabenrechner.KrankenkassenInfo info =
-                            new Abgabenrechner.KrankenkassenInfo(gesamt, zusatz);
+                    Sozialabgabenrechner.KrankenkassenInfo info =
+                            new Sozialabgabenrechner.KrankenkassenInfo(gesamt, zusatz);
 
                     // In HashMap speichern
                     daten.put(name, info);
