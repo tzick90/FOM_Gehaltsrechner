@@ -10,6 +10,9 @@ public class Ergebnis {
     private double soliJahr;
     private double soliMonat;
     private double kvBeitrag;
+    private double kvZusatz;
+    private double kvBasisBetrag;
+    private double kvZusatzBetrag;
     private double rvBeitrag;
     private double avBeitrag;
     private double pvBeitrag;
@@ -23,7 +26,10 @@ public class Ergebnis {
             double kirchensteuerMonat, // 6.
             double soliJahr,           // 7.
             double soliMonat,          // 8.
-            double kvBeitrag,          // 9.
+            double kvBeitrag,
+            double kvZusatz,
+            double kvBasisBetrag,      // 9.
+            double kvZusatzBetrag,  // 9.
             double rvBeitrag,          // 10.
             double avBeitrag,          // 11.
             double pvBeitrag           // 12.
@@ -37,6 +43,9 @@ public class Ergebnis {
         this.soliJahr           = soliJahr;
         this.soliMonat          = soliMonat;
         this.kvBeitrag          = kvBeitrag;
+        this.kvZusatz           = kvZusatz;
+        this.kvBasisBetrag      = kvBasisBetrag;
+        this.kvZusatzBetrag     = kvZusatzBetrag;
         this.rvBeitrag          = rvBeitrag;
         this.avBeitrag          = avBeitrag;
         this.pvBeitrag          = pvBeitrag;
@@ -51,6 +60,9 @@ public class Ergebnis {
     public double getSoliJahr()           { return soliJahr; }
     public double getSoliMonat()          { return soliMonat; }
     public double getKvBeitrag()          { return kvBeitrag; }
+    public double getKvZusatz()           { return kvZusatz; }
+    public double getKvBasisBetrag()      { return kvBasisBetrag; }
+    public double getKvZusatzBetrag()     { return kvZusatzBetrag; }
     public double getRvBeitrag()          { return rvBeitrag; }
     public double getAvBeitrag()          { return avBeitrag; }
     public double getPvBeitrag()          { return pvBeitrag; }

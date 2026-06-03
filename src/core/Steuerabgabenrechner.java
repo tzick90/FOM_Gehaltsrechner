@@ -297,24 +297,6 @@ public class Steuerabgabenrechner {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   /**
   * Einkommensteuer-Berechnung nach §32a EStG
   * (Bleibt gleich - gibt Jahreswert zurück)

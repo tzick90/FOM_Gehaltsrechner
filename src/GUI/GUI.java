@@ -4,7 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.time.Year;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.List;
 
@@ -15,12 +18,21 @@ import core.FuzzyMatcher;
 import util.Abgabenrechner;
 import util.Ergebnis;
 
-public class GUI {
+import static GUI.ProgramSettings.*;
+
+public class GUI extends Component {
+
+    static String formatEUR(double wert) {
+        NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
+        nf.setMinimumFractionDigits(2);
+        nf.setMaximumFractionDigits(2);
+        return nf.format(wert);
+    }
 
     static JMenuItem item1, item2, item3;
     static JFrame frame;
 
-    public static void main(String[] args) {
+    public void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("Gehaltsrechner");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -76,25 +88,10 @@ public class GUI {
             FiscalYearCurrentButton.setActionCommand("Aktuelles Fiskaljahr");
 
 
-            // adding Radio-Button to choose between monthly or anually salary calculation
-            JRadioButton MonthlyCalcButton = new JRadioButton("Monat");
-            MonthlyCalcButton.setMnemonic(KeyEvent.VK_M);
-            MonthlyCalcButton.setActionCommand("Monat");
-
-            JRadioButton YearlyCalcButton = new JRadioButton("Jahr");
-            YearlyCalcButton.setMnemonic(KeyEvent.VK_J);
-            YearlyCalcButton.setActionCommand("Jahr");
-
-
             // Grouping the RadioButtons
             ButtonGroup FiscalYearButtonsGroup = new ButtonGroup();
             FiscalYearButtonsGroup.add(FiscalYearPreviousButton);
             FiscalYearButtonsGroup.add(FiscalYearCurrentButton);
-
-            ButtonGroup SalaryValueButton = new ButtonGroup();
-            SalaryValueButton.add(MonthlyCalcButton);
-            SalaryValueButton.add(YearlyCalcButton);
-
 
 
             /*
@@ -291,10 +288,7 @@ public class GUI {
             leftPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
             // ---- optische Trennlinie ENDE -----
 
-            gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 2;
-            leftPanel.add(MonthlyCalcButton, gbc);
-            gbc.gridy++;
-            leftPanel.add(YearlyCalcButton, gbc);
+
 
             // Placement of Salaryfield
             gbc.gridy++; gbc.gridx = 0;
@@ -367,7 +361,8 @@ public class GUI {
             JPanel rightPanel = new JPanel(new BorderLayout());
             rightPanel.setBorder(BorderFactory.createTitledBorder("Ausgabe"));
 
-            JTextArea outputArea = new JTextArea();
+            JTextPane outputArea = new JTextPane();
+            outputArea.setContentType("text/html");
             outputArea.setEditable(false);
             JScrollPane scrollPane = new JScrollPane(outputArea);
             rightPanel.add(scrollPane, BorderLayout.CENTER);
@@ -385,10 +380,24 @@ public class GUI {
                 String chosenTaxClass = SteuerKlasseDropdown.getSelectedItem().toString().trim();
                 String churchMembership = KirchenMitgliedDropdown.getSelectedItem().toString().trim();
                 String chosenHealthInsurance = KrankenkassenDropdown.getSelectedItem().toString().trim();
-                String fiscalYear = FiscalYearPreviousButton.isSelected() ? "Letztes Fiskaljahr" :
-                        FiscalYearCurrentButton.isSelected() ? "Aktuelles Fiskaljahr" : "Nicht ausgewählt";
-                String grossSalaryMode = MonthlyCalcButton.isSelected() ? "monatlich" :
-                        YearlyCalcButton.isSelected() ? "jährlich" : "Nicht ausgewählt";
+                int fiscalYear = FiscalYearPreviousButton.isSelected() ? Year.now().getValue()-1 :
+                        FiscalYearCurrentButton.isSelected() ? Year.now().getValue() : 0;
+
+                if (fiscalYear == 0) {
+                    JOptionPane.showMessageDialog(this,
+                            "Bitte ein Fiskaljahr auswählen!",
+                            "Fehler",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                if (nKids < 0 || salary < 0 || chosenAge <0) {
+                    JOptionPane.showMessageDialog(this,
+                            "Diese Eingabe darf nicht negativ sein!",
+                            "Fehler",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
 
 
                 Ergebnis ergebnis = Abgabenrechner.berechneGehalt(
@@ -397,32 +406,78 @@ public class GUI {
                         churchMembership,
                         chosenState,
                         nKids,
-                        "2026",
+                        fiscalYear,
                         chosenHealthInsurance,
-                        chosenAge
+                        chosenAge,
+                        // CSV-Pfade aus Programm-Setting
+                        getSteuerSaetzePfad(),
+                        getEinkommenssteuerGrenzenPfad(),
+                        getBundeslandUndKirchensteuerPfad(),
+                        getSteuerpauschalenPfad(),
+                        getKrankenkassenPfad(),
+                        getSozialversicherungssaetzePfad()
                 );
+
                 outputArea.setText(
-                        "Bruttogehalt: "+ String.format("%.2f €",salary) + "\n"
-                       + "Lohnsteuer: " + "-" + String.format("%.2f €", ergebnis.getLohnsteuerMonat()) + "\n"
-                       + "Kirchsteuer: " + "-" + String.format("%.2f €", ergebnis.getKirchensteuerMonat()) + "\n"
-                       + "Soli: " + "-" + String.format("%.2f €", ergebnis.getSoliMonat()) + "\n"
-                       + "Zwischenergebnis: " + String.format("%.2f €", salary - (ergebnis.getLohnsteuerMonat() + ergebnis.getKirchensteuerMonat() + ergebnis.getSoliMonat())) + "\n"
-                       + "\n"
-                       + "\n"
-                       + "Sozialabgaben (Arbeitnehmer):" + "\n"
-                       + "KV-Abzug: " + "-" + String.format("%.2f €", ergebnis.getKvBeitrag()) + "\n"
-                       + "RV-Abzug: " + "-" + String.format("%.2f €", ergebnis.getRvBeitrag()) + "\n"
-                       + "AV-Abzug: " + "-" + String.format("%.2f €", ergebnis.getAvBeitrag()) + "\n"
-                       + "PV-Abzug: " + "-" + String.format("%.2f €", ergebnis.getPvBeitrag()) + "\n"
-                       + "Gesamtsumme Abgaben: " + String.format("%.2f €",
-                                ergebnis.getPvBeitrag()
-                                + ergebnis.getRvBeitrag()
-                                + ergebnis.getKvBeitrag()
-                                + ergebnis.getAvBeitrag()) + "\n"
-                       + "\n"
-                       + "\n"
-                       + "Nettogehalt: "+String.format("%.2f €", ergebnis.getNettoMonat())
+                        "<html><body style='font-family: monospace; font-size: 12px; padding: 10px'>" +
+                            "<table width='100%'>" +
+                            "<tr><th align='left'>Ausgewähltes Fiskaljahr: "+fiscalYear + "</th></tr>"+
+                            "<tr><th align='left'>Position</th><th align='right'>Monat</th><th align='right'>Jahr</th></tr>" +
+                            "<tr><td colspan='3'><hr/></td></tr>" +
+                            // Brutto
+                            "<tr><td><b>Bruttogehalt</b></td>" +
+                            "<td align='right'><b>" + formatEUR(ergebnis.getBrutto()) + "</b></td>" + "<td><b>€</b></td>" +
+                            "<td align='right'><b>" + formatEUR(ergebnis.getBrutto() * 12) + "</b></td></tr>" + "<td><b>€</b></td>" +
 
+                            "<tr><td colspan='3'><br/><b>── Steuern ──────────────</b></td></tr>" +
+
+                            "<tr><td>Lohnsteuer</td>" +
+                            "<td align='right'>" + formatEUR(ergebnis.getLohnsteuerMonat()) + "</td>" + "<td><b>€</b></td>" +
+                            "<td align='right'>" + formatEUR(ergebnis.getLohnsteuerJahr()) + "</td></tr>" + "<td><b>€</b></td>" +
+
+                            "<tr><td>Kirchensteuer</td>" +
+                            "<td align='right'>" + formatEUR(ergebnis.getKirchensteuerMonat()) + "</td>" + "<td><b>€</b></td>" +
+                            "<td align='right'>" + formatEUR(ergebnis.getKirchensteuerJahr()) + "</td></tr>" + "<td><b>€</b></td>" +
+
+                            "<tr><td>Soli</td>" +
+                            "<td align='right'>" + formatEUR(ergebnis.getSoliMonat()) + "</td>" + "<td><b>€</b></td>" +
+                            "<td align='right'>" + formatEUR(ergebnis.getSoliJahr()) + "</td></tr>" + "<td><b>€</b></td>" +
+
+                            "<tr><td colspan='3'><br/><b>── Sozialabgaben (AN-Anteil)  ────────</b></td></tr>" +
+
+                            "<tr><td>Krankenversicherung</td>" +
+                            "<td align='right'>" + formatEUR(ergebnis.getKvBeitrag()) + "</td>" + "<td><b>€</b></td>" +
+                            "<td align='right'>" + formatEUR(ergebnis.getKvBeitrag() * 12) + "</td></tr>" + "<td><b>€</b></td>" +
+
+                                "<tr><td><i>&nbsp;&nbsp; ..davon Basisbeitrag (7,30%)</i></td>" +
+                                "<td align='right'><i>" + formatEUR(ergebnis.getKvBasisBetrag()) + "</i></td>" + "<td><b>€</b></td>" +
+                                "<td align='right'><i>" + formatEUR(ergebnis.getKvBasisBetrag() * 12) + "</i></td></tr>" + "<td><b>€</b></td>" +
+
+                                "<tr><td><i>&nbsp;&nbsp; ..davon Zusatzbeitrag durch: " + chosenHealthInsurance +
+                                " (" + String.format("%.2f €",ergebnis.getKvZusatz()) + "%)</i></td>" +
+                                "<td align='right'><i>" + formatEUR(ergebnis.getKvZusatzBetrag()) + "</i></td>" + "<td><b>€</b></td>" +
+                                "<td align='right'><i>" + formatEUR(ergebnis.getKvZusatzBetrag() * 12) + "</i></td></tr>" + "<td><b>€</b></td>" +
+
+                            "<tr><td>Rentenversicherung</td>" +
+                            "<td align='right'>" + formatEUR(ergebnis.getRvBeitrag()) + "</td>" + "<td><b>€</b></td>" +
+                            "<td align='right'>" + formatEUR(ergebnis.getRvBeitrag() * 12) + "</td></tr>" + "<td><b>€</b></td>" +
+
+                            "<tr><td>Arbeitslosenvers.</td>" +
+                            "<td align='right'>" + formatEUR(ergebnis.getAvBeitrag()) + "</td>" + "<td><b>€</b></td>" +
+                            "<td align='right'>" + formatEUR(ergebnis.getAvBeitrag() * 12) + "</td></tr>" + "<td><b>€</b></td>" +
+
+                            "<tr><td>Pflegeversicherung</td>" +
+                            "<td align='right'>" + formatEUR(ergebnis.getPvBeitrag()) + "</td>" + "<td><b>€</b></td>" +
+                            "<td align='right'>" + formatEUR(ergebnis.getPvBeitrag() * 12) + "</td></tr>" + "<td><b>€</b></td>" +
+
+                            "<tr><td colspan='3'><hr/></td></tr>" +
+
+                            // Netto
+                            "<tr><td><b>Nettogehalt</b></td>" +
+                            "<td align='right'><b>" + formatEUR(ergebnis.getNettoMonat()) + "</b></td>" + "<td><b>€</b></td>" +
+                            "<td align='right'><b>" + formatEUR(ergebnis.getNettoMonat() * 12) + "</b></td></tr>" + "<td><b>€</b></td>" +
+
+                            "</table></body></html>"
                 );
 
 
@@ -433,40 +488,6 @@ public class GUI {
 
 
 
-            /*
-            submitButton.addActionListener(e -> {
-                String salary = GrossSalaryField.getText().trim();
-                String nKids = NumberOfChildrenField.getText().trim();
-                String chosenAge = AgeInputField.getText().trim();
-                String chosenState = bundeslandDropdown.getSelectedItem().toString().trim();
-                String chosenTaxClass = SteuerKlasseDropdown.getSelectedItem().toString().trim();
-                String churchMembership = KirchenMitgliedDropdown.getSelectedItem().toString().trim();
-                String chosenHealthInsurance = KrankenkassenDropdown.getSelectedItem().toString().trim();
-                String fiscalYear = FiscalYearPreviousButton.isSelected() ? "Letztes Fiskaljahr" :
-                        FiscalYearCurrentButton.isSelected() ? "Aktuelles Fiskaljahr" : "Nicht ausgewählt";
-                String grossSalaryMode = MonthlyCalcButton.isSelected() ? "monatlich" :
-                        YearlyCalcButton.isSelected() ? "jährlich" : "Nicht ausgewählt";
-
-                if (salary.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, "Bitte alle Felder ausfüllen.", "Fehler", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                outputArea.append("Gehalt: " + salary + "\n"
-                        + "Jahr: " + fiscalYear + "\n"
-                        + "Anzahl Kinder: " + nKids + "\n"
-                        + "Alter: " + chosenAge + "\n"
-                        + "Bundesland: " + chosenState + "\n"
-                        + "Steuerklasse: " + chosenTaxClass + "\n"
-                        + "Ist Kirchenmitglied: " + churchMembership + "\n"
-                        + "Gewählte Krankenkasse: " + chosenHealthInsurance + "\n"
-                        + "Bruttolohn-Angabe: " + grossSalaryMode + "\n");
-                GrossSalaryField.setText("");
-            });
-
-             */
-
-
-
 
             frame.setVisible(true);
         });
@@ -477,61 +498,4 @@ public class GUI {
 
 
 
-            // Register ActionListener to Buttons
-            //FiscalYearPreviousButton.addActionListener(new ActionHandler());
-            //FiscalYearCurrentButton.addActionListener(new ActionHandler());
-
-            //FiscalYearPreviousButton.setBounds(20, 20, 180, 30);
-            //FiscalYearCurrentButton.setBounds(20, 50, 180, 30);
-
-            //JLabel label = new JLabel("✅ Swing funktioniert!", SwingConstants.CENTER);
-            //label.setFont(new Font("Arial", Font.BOLD, 24));
-
-            //frame.add(label);
-           // frame.add(FiscalYearPreviousButton);
-            //frame.add(FiscalYearCurrentButton);
-
-
-            /*
-            ----------------------------------------------------------------------------------
-            Adding Add Toggle-Button to activate comparisson-mode
-            ---------------------------------------------------------------------------------
-             */
-    /*
-            JToggleButton ComparissonModeToggleButton = new JRadioButton("Jahresvergleich",false);
-
-            // Make background white and keep it visible
-            ComparissonModeToggleButton.setBackground(Color.WHITE);
-            ComparissonModeToggleButton.setOpaque(true);
-            ComparissonModeToggleButton.setContentAreaFilled(true);
-            ComparissonModeToggleButton.setFocusPainted(false);
-            ComparissonModeToggleButton.setBorderPainted(true);
-
-            // Change background manually when toggled
-            ComparissonModeToggleButton.addItemListener(e -> {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    ComparissonModeToggleButton.setBackground(Color.lightGray); // selected color
-                } else {
-                    ComparissonModeToggleButton.setBackground(Color.WHITE); // unselected color
-                }
-            });
-
-            ComparissonModeToggleButton.setBounds(200, 20, 180, 50);
-
-            frame.add(ComparissonModeToggleButton);
-
-
-
-
-            JTextField BruttoLohnFeld = new JTextField();
-            BruttoLohnFeld.setBounds(200, 200, 100, 25);
-            frame.add(BruttoLohnFeld);
-
-
-
-            frame.setVisible(true);
-        });
-    }
-}
-*/
 

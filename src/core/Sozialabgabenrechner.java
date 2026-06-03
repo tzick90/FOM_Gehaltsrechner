@@ -54,6 +54,13 @@ public class Sozialabgabenrechner {
 
         return bemessungsgrundlage * kvSatzAN / 100;
     }
+    public static double berechneKvBasisAnteil(double bruttogehalt, double kvBasis, double bbgKV) {
+        return Math.min(bruttogehalt, bbgKV) * (kvBasis / 2) / 100;
+    }
+
+    public static double berechneKvZusatzAnteil(double bruttogehalt, double kvZusatz, double bbgKV) {
+        return Math.min(bruttogehalt, bbgKV) * (kvZusatz / 2) / 100;
+    }
 
     /**
      *Berechnet die Rentenversicherung (Arbeitnehmeranteil)

@@ -13,6 +13,15 @@ public class Abgabenrechner {
     /**
      * Berechnet Netto aus Brutto für GUI
      *
+     *  CSV-Pfade:
+     * @param steuerSaetzePfad xx
+     * @param einkommenssteuerGrenzenPfad
+     * @param bundeslandUndKirchensteuerPfad
+     * @param steuerPauschalenPfad
+     * @param krankenkassenPfad
+     * @param sozialversicherungssaetzePfad
+     *
+     *  Werte für Berechnung:
      * @param brutto Brutto-Gehalt
      * @param steuerklasse Steuerklasse (1-6)
      * @param gewähltesBundesland Bundesland (für Kirchensteuer)
@@ -30,16 +39,22 @@ public class Abgabenrechner {
             String kirchenmitglied,
             String gewähltesBundesland,
             int kinderanzahl,
-            String jahr,
+            int jahr,
             String gewählteKK,
-            int alter
+            int alter,
+            // CSV-Pfade:
+            String steuerSaetzePfad,
+            String einkommenssteuerGrenzenPfad,
+            String bundeslandUndKirchensteuerPfad,
+            String steuerPauschalenPfad,
+            String krankenkassenPfad,
+            String sozialversicherungssaetzePfad
+
 
     ) {
         // hier der Code von Main rein:
 
-        // Calculate actual and previous year and store in vars
-        int currentYear = Year.now().getValue();
-        int previousYear = currentYear -1;
+
 
         //steuerrechner erwartet boolean kirchenmitglied, GUI liefert String -> Folge: in Boolean übersetzen
         boolean istKirchenmitglied = false;
@@ -56,27 +71,27 @@ public class Abgabenrechner {
         Map<String, Double> pauschalen;
         Map<String, Double> steuersaetze;
 
-        int jahrInt = Integer.parseInt(jahr);
+
 
         //-> Auslesen der CSVs
         try {
             // Sozialversicherung Basis laden
-            svSaetze = CsvReader.lesenMitJahr("config/sozialversicherung_saetze.csv", jahrInt);
+            svSaetze = CsvReader.lesenMitJahr(sozialversicherungssaetzePfad, jahr);
 
             // Krankenkassen laden
-            krankenkassen = CsvReader.leseKrankenkassen("config/krankenkassen.csv");
+            krankenkassen = CsvReader.leseKrankenkassen(krankenkassenPfad);
 
             // Einkommensteuergrenzen laden
-            einkommensteuerGrenzen = CsvReader.lesenMitJahr("config/einkommensteuer_grenzen.csv", jahrInt);
+            einkommensteuerGrenzen = CsvReader.lesenMitJahr(einkommenssteuerGrenzenPfad, jahr);
 
             // Bundesländer laden
-            bundeslaender = CsvReader.leseBundeslaenderMitJahr("config/Bundesland_und_Kirchensteuer.csv", jahrInt); // Note:
+            bundeslaender = CsvReader.leseBundeslaenderMitJahr(bundeslandUndKirchensteuerPfad, jahr); // Note:
 
             // Pauschalen laden
-            pauschalen = CsvReader.lesenMitJahr("config/pauschalen.csv", jahrInt);
+            pauschalen = CsvReader.lesenMitJahr(steuerPauschalenPfad, jahr);
 
             // Steuersätze laden
-            steuersaetze = CsvReader.lesenMitJahr("config/steuer_saetze.csv", jahrInt);
+            steuersaetze = CsvReader.lesenMitJahr(steuerSaetzePfad, jahr);
 
             System.out.println("✓ CSVs erfolgreich geladen!");
 
@@ -124,10 +139,22 @@ public class Abgabenrechner {
         Sozialabgabenrechner.KrankenkassenInfo kkInfo = krankenkassen.get(gewählteKK);
         double kvZusatz = kkInfo.getZusatzbeitrag();  // z.B. 2.69%
 
-        double kvBeitrag = Sozialabgabenrechner.berechneKrankenversicherung(
+        double kvBetrag = Sozialabgabenrechner.berechneKrankenversicherung(
                 brutto,
                 kvBasis,   // 14.6%
                 kvZusatz,  // z.B. 2.69%
+                bbgKV
+        );
+
+        double kvBasisBetrag = Sozialabgabenrechner.berechneKvBasisAnteil(
+                brutto,
+                kvBasis,
+                bbgKV
+        );
+
+        double kvZusatzbeitrag = Sozialabgabenrechner.berechneKvZusatzAnteil(
+                brutto,
+                kvZusatz,
                 bbgKV
         );
 
@@ -157,7 +184,7 @@ public class Abgabenrechner {
         );
 
         // Summe Sozialabgaben
-        double sozialabgabenGesamt = kvBeitrag + rvBeitrag + avBeitrag + pvBeitrag;
+        double sozialabgabenGesamt = kvBetrag + rvBeitrag + avBeitrag + pvBeitrag;
 
 
 
@@ -187,7 +214,7 @@ public class Abgabenrechner {
                         zone1Ende,
                         zone2Ende,
                         zone3Ende,
-                        jahrInt
+                        jahr
                 );
                 break;
 
@@ -204,7 +231,7 @@ public class Abgabenrechner {
                         zone1Ende,
                         zone2Ende,
                         zone3Ende,
-                        jahrInt
+                        jahr
                 );
                 break;
 
@@ -218,7 +245,7 @@ public class Abgabenrechner {
                         zone1Ende,
                         zone2Ende,
                         zone3Ende,
-                        jahrInt
+                        jahr
                 );
                 break;
 
@@ -231,7 +258,7 @@ public class Abgabenrechner {
                         zone1Ende,
                         zone2Ende,
                         zone3Ende,
-                        jahrInt
+                        jahr
                 );
                 break;
 
@@ -242,7 +269,7 @@ public class Abgabenrechner {
                         zone1Ende,
                         zone2Ende,
                         zone3Ende,
-                        jahrInt
+                        jahr
                 );
                 break;
 
@@ -294,7 +321,10 @@ public class Abgabenrechner {
                 soliJahr,
                 soliMonat,
                 //kirchensteuer,
-                kvBeitrag,
+                kvBetrag,
+                kvZusatz,
+                kvBasisBetrag,
+                kvZusatzbeitrag,
                 rvBeitrag,
                 avBeitrag,
                 pvBeitrag

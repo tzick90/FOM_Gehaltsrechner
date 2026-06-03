@@ -3,67 +3,105 @@ package GUI;
 import javax.swing.*;
 import java.awt.*;
 
+
 public class ProgramSettings extends JDialog {
     public ProgramSettings(Frame owner) {
         super(owner, "Einstellungen",true);
-        setSize(400,300);
+        setSize(700,500);
         setLocationRelativeTo(owner);
         setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
     }
-    private JTextField steuer1Field;
-    private JTextField steuer2Field;
-    private JTextField sozialField;
+    private static JTextField steuerSaetze;
+    private static JTextField einkommenssteuerGrenzen;
+    private static JTextField bundeslandUndKirchensteuer;
+    private static JTextField steuerPauschalen;
+    private static JTextField krankenkassen;
+    private static JTextField sozialversicherungsSaetze;
 
     public ProgramSettings(JFrame parent) {
         super(parent, "Einstellungen", true);
 
         JTabbedPane tabs = new JTabbedPane();
 
-        tabs.addTab("Steuern", createSteuerPanel());
-        tabs.addTab("Sozialversicherung", createSozialPanel());
+        tabs.addTab("Steuern-CSVs", createSteuerPanel());
+        tabs.addTab("Sozialversicherung-CSVs", createSozialPanel());
 
         add(tabs);
         pack();
     }
 
+    // create first Panel for tax-related CSV-files:
     private JPanel createSteuerPanel() {
         JPanel panel = new JPanel(new GridLayout(2,3));
 
-        steuer1Field = new JTextField();
-        JButton browse1 = new JButton("...");
+        // erstes Steuer-Feld
+        steuerSaetze = new JTextField();
+        JButton browseSteuerSaetze = new JButton("...");
 
-        browse1.addActionListener(e -> chooseFile(steuer1Field));
+        browseSteuerSaetze.addActionListener(e -> chooseFile(steuerSaetze));
 
-        panel.add(new JLabel("Steuer CSV 1:"));
-        panel.add(steuer1Field);
-        panel.add(browse1);
+        panel.add(new JLabel("Steuer-Sätze:"));
+        panel.add(steuerSaetze);
+        panel.add(browseSteuerSaetze);
 
-        // zweites Feld
-        steuer2Field = new JTextField();
-        JButton browse2 = new JButton("...");
+        // zweites Steuer-Feld
+        einkommenssteuerGrenzen = new JTextField();
+        JButton browseEinkommenssteuerGrenzen = new JButton("...");
 
-        browse2.addActionListener(e -> chooseFile(steuer2Field));
+        browseEinkommenssteuerGrenzen.addActionListener(e -> chooseFile(einkommenssteuerGrenzen));
 
-        panel.add(new JLabel("Steuer CSV 2:"));
-        panel.add(steuer2Field);
-        panel.add(browse2);
+        panel.add(new JLabel("Einkommenssteuer-Grenzen:"));
+        panel.add(einkommenssteuerGrenzen);
+        panel.add(browseEinkommenssteuerGrenzen);
+
+        // drittes Steuer-Feld
+        bundeslandUndKirchensteuer = new JTextField();
+        JButton browseBundeslandUndKirchensteuer = new JButton("...");
+        browseBundeslandUndKirchensteuer.addActionListener(e -> chooseFile(bundeslandUndKirchensteuer));
+
+        panel.add(new JLabel("Bundesländer:"));
+        panel.add((bundeslandUndKirchensteuer));
+        panel.add(browseBundeslandUndKirchensteuer);
+
+
+        // viertes Steuer-Feld
+        steuerPauschalen = new JTextField();
+        JButton browseSteuerPauschalen = new JButton("...");
+        browseSteuerPauschalen.addActionListener(e -> chooseFile(steuerPauschalen));
+
+        panel.add(new JLabel("Steuer-Pauschalen:"));
+        panel.add((steuerPauschalen));
+        panel.add(browseSteuerPauschalen);
 
         return panel;
 
     }
 
-
+    // Create second Panel for social-security related CSV-Files:
     private JPanel createSozialPanel() {
         JPanel panel = new JPanel(new GridLayout(1, 3));
 
-        sozialField = new JTextField();
-        JButton browse = new JButton("...");
 
-        browse.addActionListener(e -> chooseFile(sozialField));
+        // erstes social security field:
+        krankenkassen = new JTextField();
+        JButton browseKrankenkassen = new JButton("...");
 
-        panel.add(new JLabel("Sozial CSV:"));
-        panel.add(sozialField);
-        panel.add(browse);
+        browseKrankenkassen.addActionListener(e -> chooseFile(krankenkassen));
+
+        panel.add(new JLabel("Krankenkassen:"));
+        panel.add(krankenkassen);
+        panel.add(browseKrankenkassen);
+
+
+        // second social security field:
+        sozialversicherungsSaetze = new JTextField();
+        JButton browseSozialversicherungsSaetze = new JButton("...");
+
+        browseSozialversicherungsSaetze.addActionListener(e -> chooseFile(sozialversicherungsSaetze));
+
+        panel.add(new JLabel("Sozialversicherungssätze:"));
+        panel.add(sozialversicherungsSaetze);
+        panel.add(browseSozialversicherungsSaetze);
 
         return panel;
     }
@@ -78,4 +116,13 @@ public class ProgramSettings extends JDialog {
             targetField.setText(chooser.getSelectedFile().getAbsolutePath());
         }
     }
+
+    // Getter deklarieren
+    public static String getSteuerSaetzePfad()                 { return steuerSaetze.getText();}
+    public static String getEinkommenssteuerGrenzenPfad()      { return einkommenssteuerGrenzen.getText();}
+    public static String getBundeslandUndKirchensteuerPfad()   { return bundeslandUndKirchensteuer.getText();}
+    public static String getSteuerpauschalenPfad()             { return steuerPauschalen.getText();}
+    public static String getKrankenkassenPfad()                { return krankenkassen.getText();}
+    public static String getSozialversicherungssaetzePfad()    { return sozialversicherungsSaetze.getText();}
+
 }
