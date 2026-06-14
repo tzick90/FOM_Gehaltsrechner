@@ -36,7 +36,7 @@ public class GUI extends Component {
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("Gehaltsrechner");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(1200, 800);
+            frame.setSize(1450, 800);
             frame.setLocationRelativeTo(null);
             frame.setLayout(new BorderLayout(10, 10));
             frame.requestFocus();
@@ -98,7 +98,7 @@ public class GUI extends Component {
             Adding Input-Fields
              */
 
-            JLabel salaryLabel = new JLabel("Gehalt (Brutto)");
+            JLabel salaryLabel = new JLabel("mon. Gehalt (Brutto)");
             JTextField GrossSalaryField = new JTextField();
 
             JButton submitButton = new JButton("Berechnen");
@@ -289,7 +289,7 @@ public class GUI extends Component {
             // ---- optische Trennlinie ENDE -----
 
 
-
+            gbc.gridwidth = 1;
             // Placement of Salaryfield
             gbc.gridy++; gbc.gridx = 0;
             leftPanel.add(salaryLabel, gbc);
@@ -304,7 +304,7 @@ public class GUI extends Component {
             leftPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
             // ---- optische Trennlinie ENDE -----
 
-
+            gbc.gridwidth = 1;
             gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 1;
             leftPanel.add(steuerKlasseLabel, gbc);
             gbc.gridx = 1;
@@ -331,7 +331,7 @@ public class GUI extends Component {
             leftPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
             // ---- optische Trennlinie ENDE -----
 
-
+            gbc.gridwidth = 1;
             gbc.gridy++; gbc.gridx = 0; gbc.gridwidth = 1;
             leftPanel.add(KrankenkassenLabel, gbc);
             gbc.gridx = 1;
@@ -383,6 +383,28 @@ public class GUI extends Component {
                 int fiscalYear = FiscalYearPreviousButton.isSelected() ? Year.now().getValue()-1 :
                         FiscalYearCurrentButton.isSelected() ? Year.now().getValue() : 0;
 
+
+                // FALL 1: Fehlende Pfade
+                List<String> fehlendePfade = ProgramSettings.getFehlendePfade();
+                if (!fehlendePfade.isEmpty()) {
+                    String nachricht = "Folgende CSV-Dateipfade fehlen noch:\n\n• "
+                            + String.join("\n• ", fehlendePfade)
+                            + "\n\nBitte in den Einstellungen festlegen.";
+                    JOptionPane.showMessageDialog(this, nachricht,
+                            "Fehlende Quelldaten!", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // FALL 2: Falsche/fehlerhafte Dateien
+                List<String> dateiFehler = ProgramSettings.pruefeAlleCsvDateien();
+                if (!dateiFehler.isEmpty()) {
+                    String nachricht = "Folgende Dateien sind fehlerhaft oder falsch zugeordnet:\n\n• "
+                            + String.join("\n• ", dateiFehler);
+                    JOptionPane.showMessageDialog(this, nachricht,
+                            "Ungültige CSV-Dateien", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 if (fiscalYear == 0) {
                     JOptionPane.showMessageDialog(this,
                             "Bitte ein Fiskaljahr auswählen!",
@@ -420,64 +442,71 @@ public class GUI extends Component {
 
                 outputArea.setText(
                         "<html><body style='font-family: monospace; font-size: 12px; padding: 10px'>" +
-                            "<table width='100%'>" +
-                            "<tr><th align='left'>Ausgewähltes Fiskaljahr: "+fiscalYear + "</th></tr>"+
-                            "<tr><th align='left'>Position</th><th align='right'>Monat</th><th align='right'>Jahr</th></tr>" +
-                            "<tr><td colspan='3'><hr/></td></tr>" +
-                            // Brutto
-                            "<tr><td><b>Bruttogehalt</b></td>" +
-                            "<td align='right'><b>" + formatEUR(ergebnis.getBrutto()) + "</b></td>" + "<td><b>€</b></td>" +
-                            "<td align='right'><b>" + formatEUR(ergebnis.getBrutto() * 12) + "</b></td></tr>" + "<td><b>€</b></td>" +
+                                "<table width='100%'>" +
+                                "<colgroup>" +
+                                "<col style='width:55%'>" +
+                                "<col style='width:22%'>" +
+                                "<col style='width:23%'>" +
+                                "</colgroup>" +
+                                "<tr><th colspan='3' align='left'>Ausgewähltes Fiskaljahr: " + fiscalYear + "</th></tr>" +
+                                "<tr><td colspan='3' style='font-style: italic; font-size: 10px; color: slategrey;'>Angaben in EUR</td></tr>" +
+                                "<tr><th align='left'>Position</th><th align='right'>Monat</th><th align='right'>Jahr</th></tr>" +
+                                "<tr><td colspan='3'><hr/></td></tr>" +
 
-                            "<tr><td colspan='3'><br/><b>── Steuern ──────────────</b></td></tr>" +
+                                // Brutto
+                                "<tr><td><b>Bruttogehalt</b></td>" +
+                                "<td align='right'><b>" + formatEUR(ergebnis.getBrutto()) + "</b></td>" +
+                                "<td align='right'><b>" + formatEUR(ergebnis.getBrutto() * 12) + "</b></td></tr>" +
 
-                            "<tr><td>Lohnsteuer</td>" +
-                            "<td align='right'>" + formatEUR(ergebnis.getLohnsteuerMonat()) + "</td>" + "<td><b>€</b></td>" +
-                            "<td align='right'>" + formatEUR(ergebnis.getLohnsteuerJahr()) + "</td></tr>" + "<td><b>€</b></td>" +
+                                "<tr><td colspan='3'><br/><b>── Steuern ──────────────</b></td></tr>" +
 
-                            "<tr><td>Kirchensteuer</td>" +
-                            "<td align='right'>" + formatEUR(ergebnis.getKirchensteuerMonat()) + "</td>" + "<td><b>€</b></td>" +
-                            "<td align='right'>" + formatEUR(ergebnis.getKirchensteuerJahr()) + "</td></tr>" + "<td><b>€</b></td>" +
+                                "<tr><td>Lohnsteuer</td>" +
+                                "<td align='right'>" + formatEUR(ergebnis.getLohnsteuerMonat()) + "</td>" +
+                                "<td align='right'>" + formatEUR(ergebnis.getLohnsteuerJahr()) + "</td></tr>" +
 
-                            "<tr><td>Soli</td>" +
-                            "<td align='right'>" + formatEUR(ergebnis.getSoliMonat()) + "</td>" + "<td><b>€</b></td>" +
-                            "<td align='right'>" + formatEUR(ergebnis.getSoliJahr()) + "</td></tr>" + "<td><b>€</b></td>" +
+                                "<tr><td>Kirchensteuer</td>" +
+                                "<td align='right'>" + formatEUR(ergebnis.getKirchensteuerMonat()) + "</td>" +
+                                "<td align='right'>" + formatEUR(ergebnis.getKirchensteuerJahr()) + "</td></tr>" +
 
-                            "<tr><td colspan='3'><br/><b>── Sozialabgaben (AN-Anteil)  ────────</b></td></tr>" +
+                                "<tr><td>Soli</td>" +
+                                "<td align='right'>" + formatEUR(ergebnis.getSoliMonat()) + "</td>" +
+                                "<td align='right'>" + formatEUR(ergebnis.getSoliJahr()) + "</td></tr>" +
 
-                            "<tr><td>Krankenversicherung</td>" +
-                            "<td align='right'>" + formatEUR(ergebnis.getKvBeitrag()) + "</td>" + "<td><b>€</b></td>" +
-                            "<td align='right'>" + formatEUR(ergebnis.getKvBeitrag() * 12) + "</td></tr>" + "<td><b>€</b></td>" +
+                                "<tr><td colspan='3'><br/><b>── Sozialabgaben (AN-Anteil)  ────────</b></td></tr>" +
+
+                                "<tr><td>Krankenversicherung</td>" +
+                                "<td align='right'>" + formatEUR(ergebnis.getKvBeitrag()) + "</td>" +
+                                "<td align='right'>" + formatEUR(ergebnis.getKvBeitrag() * 12) + "</td></tr>" +
 
                                 "<tr><td><i>&nbsp;&nbsp; ..davon Basisbeitrag (7,30%)</i></td>" +
-                                "<td align='right'><i>" + formatEUR(ergebnis.getKvBasisBetrag()) + "</i></td>" + "<td><b>€</b></td>" +
-                                "<td align='right'><i>" + formatEUR(ergebnis.getKvBasisBetrag() * 12) + "</i></td></tr>" + "<td><b>€</b></td>" +
+                                "<td align='right' style='color: slategrey;'><i>"  + formatEUR(ergebnis.getKvBasisBetrag()) + "</i></td>" +
+                                "<td align='right' style='color: slategrey;'><i>"  + formatEUR(ergebnis.getKvBasisBetrag() * 12) + "</i></td></tr>" +
 
-                                "<tr><td><i>&nbsp;&nbsp; ..davon Zusatzbeitrag durch: " + chosenHealthInsurance +
-                                " (" + String.format("%.2f €",ergebnis.getKvZusatz()) + "%)</i></td>" +
-                                "<td align='right'><i>" + formatEUR(ergebnis.getKvZusatzBetrag()) + "</i></td>" + "<td><b>€</b></td>" +
-                                "<td align='right'><i>" + formatEUR(ergebnis.getKvZusatzBetrag() * 12) + "</i></td></tr>" + "<td><b>€</b></td>" +
+                                "<tr><td style='color: slategrey;'><i>&nbsp;&nbsp; ..davon Zusatzbeitrag durch: " + chosenHealthInsurance +
+                                " (" + String.format("%.2f", ergebnis.getKvZusatz()) + "%)</i></td>" +
+                                "<td align='right' style='color: slategrey;'><i>" + formatEUR(ergebnis.getKvZusatzBetrag()) + "</i></td>" +
+                                "<td align='right' style='color: slategrey;'><i>" + formatEUR(ergebnis.getKvZusatzBetrag() * 12) + "</i></td></tr>" +
 
-                            "<tr><td>Rentenversicherung</td>" +
-                            "<td align='right'>" + formatEUR(ergebnis.getRvBeitrag()) + "</td>" + "<td><b>€</b></td>" +
-                            "<td align='right'>" + formatEUR(ergebnis.getRvBeitrag() * 12) + "</td></tr>" + "<td><b>€</b></td>" +
+                                "<tr><td>Rentenversicherung</td>" +
+                                "<td align='right'>" + formatEUR(ergebnis.getRvBeitrag()) + "</td>" +
+                                "<td align='right'>" + formatEUR(ergebnis.getRvBeitrag() * 12) + "</td></tr>" +
 
-                            "<tr><td>Arbeitslosenvers.</td>" +
-                            "<td align='right'>" + formatEUR(ergebnis.getAvBeitrag()) + "</td>" + "<td><b>€</b></td>" +
-                            "<td align='right'>" + formatEUR(ergebnis.getAvBeitrag() * 12) + "</td></tr>" + "<td><b>€</b></td>" +
+                                "<tr><td>Arbeitslosenvers.</td>" +
+                                "<td align='right'>" + formatEUR(ergebnis.getAvBeitrag()) + "</td>" +
+                                "<td align='right'>" + formatEUR(ergebnis.getAvBeitrag() * 12) + "</td></tr>" +
 
-                            "<tr><td>Pflegeversicherung</td>" +
-                            "<td align='right'>" + formatEUR(ergebnis.getPvBeitrag()) + "</td>" + "<td><b>€</b></td>" +
-                            "<td align='right'>" + formatEUR(ergebnis.getPvBeitrag() * 12) + "</td></tr>" + "<td><b>€</b></td>" +
+                                "<tr><td>Pflegeversicherung</td>" +
+                                "<td align='right'>" + formatEUR(ergebnis.getPvBeitrag()) + "</td>" +
+                                "<td align='right'>" + formatEUR(ergebnis.getPvBeitrag() * 12) + "</td></tr>" +
 
-                            "<tr><td colspan='3'><hr/></td></tr>" +
+                                "<tr><td colspan='3'><hr/></td></tr>" +
 
-                            // Netto
-                            "<tr><td><b>Nettogehalt</b></td>" +
-                            "<td align='right'><b>" + formatEUR(ergebnis.getNettoMonat()) + "</b></td>" + "<td><b>€</b></td>" +
-                            "<td align='right'><b>" + formatEUR(ergebnis.getNettoMonat() * 12) + "</b></td></tr>" + "<td><b>€</b></td>" +
+                                // Netto
+                                "<tr><td><b>Nettogehalt</b></td>" +
+                                "<td align='right'><b>" + formatEUR(ergebnis.getNettoMonat()) + "</b></td>" +
+                                "<td align='right'><b>" + formatEUR(ergebnis.getNettoMonat() * 12) + "</b></td></tr>" +
 
-                            "</table></body></html>"
+                                "</table></body></html>"
                 );
 
 

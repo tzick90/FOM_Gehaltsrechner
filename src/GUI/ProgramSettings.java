@@ -2,15 +2,25 @@ package GUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Properties;
+import core.CsvValidator;
 
 
 public class ProgramSettings extends JDialog {
+
     public ProgramSettings(Frame owner) {
         super(owner, "Einstellungen",true);
         setSize(700,500);
         setLocationRelativeTo(owner);
         setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
     }
+
+
+    private static final String SETTINGS_FILE = "settings.properties";
+
     private static JTextField steuerSaetze;
     private static JTextField einkommenssteuerGrenzen;
     private static JTextField bundeslandUndKirchensteuer;
@@ -26,7 +36,16 @@ public class ProgramSettings extends JDialog {
         tabs.addTab("Steuern-CSVs", createSteuerPanel());
         tabs.addTab("Sozialversicherung-CSVs", createSozialPanel());
 
-        add(tabs);
+        //New Save-Button für Dateipfade:
+        dateiPfadeLaden();
+
+        JButton speichernButton = new JButton("Pfade speichern");
+        speichernButton.addActionListener(e -> dateiPfadeSpeichern());
+
+
+        add(tabs, BorderLayout.CENTER);
+        add(speichernButton, BorderLayout.SOUTH);
+
         pack();
     }
 
@@ -35,7 +54,7 @@ public class ProgramSettings extends JDialog {
         JPanel panel = new JPanel(new GridLayout(2,3));
 
         // erstes Steuer-Feld
-        steuerSaetze = new JTextField();
+        steuerSaetze = new JTextField(20);
         JButton browseSteuerSaetze = new JButton("...");
 
         browseSteuerSaetze.addActionListener(e -> chooseFile(steuerSaetze));
@@ -45,7 +64,7 @@ public class ProgramSettings extends JDialog {
         panel.add(browseSteuerSaetze);
 
         // zweites Steuer-Feld
-        einkommenssteuerGrenzen = new JTextField();
+        einkommenssteuerGrenzen = new JTextField(20);
         JButton browseEinkommenssteuerGrenzen = new JButton("...");
 
         browseEinkommenssteuerGrenzen.addActionListener(e -> chooseFile(einkommenssteuerGrenzen));
@@ -55,7 +74,7 @@ public class ProgramSettings extends JDialog {
         panel.add(browseEinkommenssteuerGrenzen);
 
         // drittes Steuer-Feld
-        bundeslandUndKirchensteuer = new JTextField();
+        bundeslandUndKirchensteuer = new JTextField(20);
         JButton browseBundeslandUndKirchensteuer = new JButton("...");
         browseBundeslandUndKirchensteuer.addActionListener(e -> chooseFile(bundeslandUndKirchensteuer));
 
@@ -65,7 +84,7 @@ public class ProgramSettings extends JDialog {
 
 
         // viertes Steuer-Feld
-        steuerPauschalen = new JTextField();
+        steuerPauschalen = new JTextField(20);
         JButton browseSteuerPauschalen = new JButton("...");
         browseSteuerPauschalen.addActionListener(e -> chooseFile(steuerPauschalen));
 
@@ -83,7 +102,7 @@ public class ProgramSettings extends JDialog {
 
 
         // erstes social security field:
-        krankenkassen = new JTextField();
+        krankenkassen = new JTextField(20);
         JButton browseKrankenkassen = new JButton("...");
 
         browseKrankenkassen.addActionListener(e -> chooseFile(krankenkassen));
@@ -94,7 +113,7 @@ public class ProgramSettings extends JDialog {
 
 
         // second social security field:
-        sozialversicherungsSaetze = new JTextField();
+        sozialversicherungsSaetze = new JTextField(20);
         JButton browseSozialversicherungsSaetze = new JButton("...");
 
         browseSozialversicherungsSaetze.addActionListener(e -> chooseFile(sozialversicherungsSaetze));
@@ -116,6 +135,100 @@ public class ProgramSettings extends JDialog {
             targetField.setText(chooser.getSelectedFile().getAbsolutePath());
         }
     }
+
+    private void dateiPfadeSpeichern() {
+        Properties properties = new Properties();
+        properties.setProperty("steuerSaetzePfad",              steuerSaetze.getText());
+        properties.setProperty("einkommenssteuerGrenzenPfad",   einkommenssteuerGrenzen.getText());
+        properties.setProperty("bundeslandUndKirchensteuerPfad", bundeslandUndKirchensteuer.getText());
+        properties.setProperty("steuerPauschalenPfad",          steuerPauschalen.getText());
+        properties.setProperty("krankenkassenPfad",             krankenkassen.getText());
+        properties.setProperty("sozialversicherungsSaetzePfad", sozialversicherungsSaetze.getText());
+
+        try (FileWriter fw = new FileWriter(SETTINGS_FILE)) {
+            properties.store(fw, "Abgabenrechner Einstellungen");
+            JOptionPane.showMessageDialog(this,
+                    "Einstellungen wurden gespeichert.",
+                    "Erfolg",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this,
+                    "Fehler beim Speichern:\n" + e.getMessage(),
+                    "Fehler",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void dateiPfadeLaden() {
+        File file = new File(SETTINGS_FILE);
+        if (!file.exists()) {
+            return;
+        }
+
+        Properties properties = new Properties();
+        try (FileReader fr = new FileReader(file)) {
+            properties.load(fr);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this,
+                    "Fehler beim Laden der Einstellungen:\n" + e.getMessage(),
+                    "Fehler",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        steuerSaetze.setText(              properties.getProperty("steuerSaetzePfad", ""));
+        einkommenssteuerGrenzen.setText(   properties.getProperty("einkommenssteuerGrenzenPfad", ""));
+        bundeslandUndKirchensteuer.setText(properties.getProperty("bundeslandUndKirchensteuerPfad", ""));
+        steuerPauschalen.setText(          properties.getProperty("steuerPauschalenPfad", ""));
+        krankenkassen.setText(             properties.getProperty("krankenkassenPfad", ""));
+        sozialversicherungsSaetze.setText( properties.getProperty("sozialversicherungsSaetzePfad", ""));
+
+    }
+
+    public static List<String> getFehlendePfade() {
+        List<String> fehlend = new ArrayList<>();
+
+        if (steuerSaetze == null || steuerSaetze.getText().isBlank())
+            fehlend.add("Steuer-Sätze");
+        if (einkommenssteuerGrenzen == null || einkommenssteuerGrenzen.getText().isBlank())
+            fehlend.add("Einkommenssteuer-Grenzen");
+        if (bundeslandUndKirchensteuer == null || bundeslandUndKirchensteuer.getText().isBlank())
+            fehlend.add("Bundesländer/Kirchensteuer");
+        if (steuerPauschalen == null || steuerPauschalen.getText().isBlank())
+            fehlend.add("Steuer-Pauschalen");
+        if (krankenkassen == null || krankenkassen.getText().isBlank())
+            fehlend.add("Krankenkassen");
+        if (sozialversicherungsSaetze == null || sozialversicherungsSaetze.getText().isBlank())
+            fehlend.add("Sozialversicherungssätze");
+
+        return fehlend;
+    }
+
+    public static List<String> pruefeAlleCsvDateien() {
+        List<String> fehler = new ArrayList<>();
+        String f;
+
+        f = CsvValidator.pruefeMitJahrCsv(getSteuerSaetzePfad());
+        if (f != null) fehler.add("Steuer-Sätze: " + f);
+
+        f = CsvValidator.pruefeMitJahrCsv(getEinkommenssteuerGrenzenPfad());
+        if (f != null) fehler.add("Einkommenssteuer-Grenzen: " + f);
+
+        f = CsvValidator.pruefeBundeslaenderCsv(getBundeslandUndKirchensteuerPfad());
+        if (f != null) fehler.add("Bundesländer: " + f);
+
+        f = CsvValidator.pruefeMitJahrCsv(getSteuerpauschalenPfad());
+        if (f != null) fehler.add("Steuer-Pauschalen: " + f);
+
+        f = CsvValidator.pruefeKrankenkassenCsv(getKrankenkassenPfad());
+        if (f != null) fehler.add("Krankenkassen: " + f);
+
+        f = CsvValidator.pruefeMitJahrCsv(getSozialversicherungssaetzePfad());
+        if (f != null) fehler.add("Sozialversicherungssätze: " + f);
+
+        return fehler;
+    }
+
+
 
     // Getter deklarieren
     public static String getSteuerSaetzePfad()                 { return steuerSaetze.getText();}
