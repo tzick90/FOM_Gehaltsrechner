@@ -28,6 +28,10 @@ public class ProgramSettings extends JDialog {
     private static JTextField krankenkassen;
     private static JTextField sozialversicherungsSaetze;
 
+    private static JRadioButton professionalModeRadio;
+    private static JRadioButton fomModeRadio;
+
+
     public ProgramSettings(JFrame parent) {
         super(parent, "Einstellungen", true);
 
@@ -35,11 +39,12 @@ public class ProgramSettings extends JDialog {
 
         tabs.addTab("Steuern-CSVs", createSteuerPanel());
         tabs.addTab("Sozialversicherung-CSVs", createSozialPanel());
+        tabs.addTab("Modus", createModusPanel());
 
         //New Save-Button für Dateipfade:
         dateiPfadeLaden();
 
-        JButton speichernButton = new JButton("Pfade speichern");
+        JButton speichernButton = new JButton("Pfade speichern & Einstellungen anwenden");
         speichernButton.addActionListener(e -> dateiPfadeSpeichern());
 
 
@@ -125,6 +130,24 @@ public class ProgramSettings extends JDialog {
         return panel;
     }
 
+    private JPanel createModusPanel() {
+        JPanel panel = new JPanel(new GridLayout(2,1,5,5));
+
+        professionalModeRadio = new JRadioButton("Für eine komplette Abgabenberechnung");
+        fomModeRadio = new JRadioButton("Projektmodus (vereinfachte Berechnung");
+
+        ButtonGroup modusGruppe = new ButtonGroup();
+        modusGruppe.add(professionalModeRadio);
+        modusGruppe.add(fomModeRadio);
+
+        professionalModeRadio.setSelected(true);
+
+        panel.add(professionalModeRadio);
+        panel.add(fomModeRadio);
+
+        return panel;
+
+    }
 
     private void chooseFile(JTextField targetField) {
         JFileChooser chooser = new JFileChooser();
@@ -145,12 +168,19 @@ public class ProgramSettings extends JDialog {
         properties.setProperty("krankenkassenPfad",             krankenkassen.getText());
         properties.setProperty("sozialversicherungsSaetzePfad", sozialversicherungsSaetze.getText());
 
+
+        properties.setProperty("modus", fomModeRadio.isSelected() ? "FOM Projektmodus":"Professional-Modus");
+
         try (FileWriter fw = new FileWriter(SETTINGS_FILE)) {
             properties.store(fw, "Abgabenrechner Einstellungen");
             JOptionPane.showMessageDialog(this,
                     "Einstellungen wurden gespeichert.",
                     "Erfolg",
                     JOptionPane.INFORMATION_MESSAGE);
+
+            // HIER_14 NEU – GUI neu aufbauen (z.B. bei Moduswechsel)
+            SwingUtilities.invokeLater(GUI::buildGUI);
+
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this,
                     "Fehler beim Speichern:\n" + e.getMessage(),
@@ -175,6 +205,15 @@ public class ProgramSettings extends JDialog {
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
+
+
+        String modus = properties.getProperty("FOM Projektmodus", "Professional-Modus");
+        if (modus.equals("Projektmodus")) {
+            fomModeRadio.setSelected(true);
+        } else {
+            professionalModeRadio.setSelected(true);
+        }
+
         steuerSaetze.setText(              properties.getProperty("steuerSaetzePfad", ""));
         einkommenssteuerGrenzen.setText(   properties.getProperty("einkommenssteuerGrenzenPfad", ""));
         bundeslandUndKirchensteuer.setText(properties.getProperty("bundeslandUndKirchensteuerPfad", ""));
@@ -231,11 +270,32 @@ public class ProgramSettings extends JDialog {
 
 
     // Getter deklarieren
-    public static String getSteuerSaetzePfad()                 { return steuerSaetze.getText();}
-    public static String getEinkommenssteuerGrenzenPfad()      { return einkommenssteuerGrenzen.getText();}
-    public static String getBundeslandUndKirchensteuerPfad()   { return bundeslandUndKirchensteuer.getText();}
-    public static String getSteuerpauschalenPfad()             { return steuerPauschalen.getText();}
-    public static String getKrankenkassenPfad()                { return krankenkassen.getText();}
-    public static String getSozialversicherungssaetzePfad()    { return sozialversicherungsSaetze.getText();}
+    public static String getSteuerSaetzePfad()                 { return steuerSaetze != null ? steuerSaetze.getText(): "";}
+    public static String getEinkommenssteuerGrenzenPfad()      { return einkommenssteuerGrenzen != null ? einkommenssteuerGrenzen.getText(): "";}
+    public static String getBundeslandUndKirchensteuerPfad()   { return bundeslandUndKirchensteuer != null ? bundeslandUndKirchensteuer.getText(): "";}
+    public static String getSteuerpauschalenPfad()             { return steuerPauschalen != null ? steuerPauschalen.getText(): "";}
+    public static String getKrankenkassenPfad()                { return krankenkassen != null ? krankenkassen.getText(): "";}
+    public static String getSozialversicherungssaetzePfad()    { return sozialversicherungsSaetze != null ? sozialversicherungsSaetze.getText(): "";}
+
+    public static String getModus() {
+        if (fomModeRadio != null) {
+            return fomModeRadio.isSelected() ? "Projektmodus" : "Vollmodus";
+        }
+
+        File file = new File(SETTINGS_FILE);
+        if (!file.exists()) return "Vollmodus";
+
+        Properties properties = new Properties();
+        try (FileReader fr = new FileReader(file)) {
+            properties.load(fr);
+        } catch (IOException e) {
+            return "Vollmodus";
+        }
+        return properties.getProperty("modus", "Vollmodus");
+    }
+
+    public static boolean istProjektmodus() {
+        return "Projektmodus".equals(getModus());
+    }
 
 }
