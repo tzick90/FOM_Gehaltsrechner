@@ -79,7 +79,7 @@ public class Abgabenrechner {
             svSaetze = CsvReader.lesenMitJahr(sozialversicherungssaetzePfad, jahr);
 
             // Krankenkassen laden
-            krankenkassen = CsvReader.leseKrankenkassen(krankenkassenPfad);
+            krankenkassen = CsvReader.leseKrankenkassen(krankenkassenPfad,jahr);
 
             // Einkommensteuergrenzen laden
             einkommensteuerGrenzen = CsvReader.lesenMitJahr(einkommenssteuerGrenzenPfad, jahr);

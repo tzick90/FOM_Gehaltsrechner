@@ -24,6 +24,8 @@ import static GUI.ProgramSettings.*;
 
 public class GUI extends Component {
 
+    static int[] jahr = { Year.now().getValue() };
+
     static String formatEUR(double wert) {
         NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
         nf.setMinimumFractionDigits(2);
@@ -31,7 +33,56 @@ public class GUI extends Component {
         return nf.format(wert);
     }
 
-    static JMenuItem item1, item2, item3;
+    static void ladeBundeslaenderDropdown(JComboBox<String> dropdown, int jahr) {
+        if (ProgramSettings.istProjektmodus()) return; // im Projektmodus nicht nötig
+
+        String pfad = ProgramSettings.getBundeslandUndKirchensteuerPfad();
+        if (pfad.isBlank()) return;
+
+        try {
+            Map<String, CsvReader.BundeslandInfo> bundeslaender =
+                    CsvReader.leseBundeslaenderMitJahr(pfad, jahr);
+
+            dropdown.removeAllItems();
+            for (String bl : bundeslaender.keySet()) {
+                dropdown.addItem(bl);
+            }
+            if (dropdown.getItemCount() > 0) {
+                dropdown.setSelectedIndex(0);
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(frame,
+                    "Fehler beim Laden der Bundesländer für Jahr " + jahr + ":\n" + e.getMessage(),
+                    "Fehler", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    static void ladeKrankenkassenDropdown(JComboBox<String> dropdown, int jahr) {
+        if (ProgramSettings.istProjektmodus()) return;
+
+        String pfad = ProgramSettings.getKrankenkassenPfad();
+        if (pfad.isBlank()) return;
+
+        try {
+            Map<String, Sozialabgabenrechner.KrankenkassenInfo> kassen =
+                    CsvReader.leseKrankenkassen(pfad, jahr);
+
+            dropdown.removeAllItems();
+            for (String kk : kassen.keySet()) {
+                dropdown.addItem(kk);
+            }
+            if (dropdown.getItemCount() > 0) {
+                dropdown.setSelectedIndex(0);
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(frame,
+                    "Fehler beim Laden der Krankenkassen für Jahr " + jahr + ":\n" + e.getMessage(),
+                    "Fehler", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
+    static JMenuItem resetEingabe, einstellungen, beenden;
     static JFrame frame;
 
     public void main(String[] args) {
@@ -57,19 +108,19 @@ public class GUI extends Component {
         JMenuBar BarMenu = new JMenuBar();
         JMenu Menu = new JMenu("Datei");
 
-        item1 = new JMenuItem("Reset Eingabe");
-        item1.addActionListener(new ActionHandler());
+        resetEingabe = new JMenuItem("Reset Eingabe");
+        resetEingabe.addActionListener(new ActionHandler());
 
-        item2 = new JMenuItem("Einstellungen");
-        item2.addActionListener(new ActionHandler());
+        einstellungen = new JMenuItem("Einstellungen");
+        einstellungen.addActionListener(new ActionHandler());
 
-        item3 = new JMenuItem("Beenden");
-        item3.addActionListener(new ActionHandler());
+        beenden = new JMenuItem("Beenden");
+        beenden.addActionListener(new ActionHandler());
 
 
-        Menu.add(item1);
-        Menu.add(item2);
-        Menu.add(item3);
+        Menu.add(resetEingabe);
+        Menu.add(einstellungen);
+        Menu.add(beenden);
         BarMenu.add(Menu);
 
         BarMenu.add(Box.createHorizontalGlue());
@@ -111,6 +162,8 @@ public class GUI extends Component {
         FiscalYearButtonsGroup.add(FiscalYearCurrentButton);
 
 
+
+
             /*
             Adding Input-Fields
              */
@@ -125,7 +178,7 @@ public class GUI extends Component {
         JLabel ageLabel = new JLabel("Alter:");
         JTextField AgeInputField = new JTextField();
 
-        int jahr = 2026; // TODO: Change with
+
 
         // HIER_4 NEU: blAbkuerzungen jetzt VOR bundeslaender
         Map<String, String> blAbkuerzungen = Map.ofEntries(
@@ -160,7 +213,7 @@ public class GUI extends Component {
                 bundeslaender = new LinkedHashMap<>(); // Pfad fehlt – FALL 1 fängt das beim Submit ab
             } else {
                 try {
-                    bundeslaender = CsvReader.leseBundeslaenderMitJahr(pfad, jahr);
+                    bundeslaender = CsvReader.leseBundeslaenderMitJahr(pfad, jahr[0]);
                 } catch (IOException e) {
                     bundeslaender = new LinkedHashMap<>(); // Datei ungültig – FALL 2 fängt das beim Submit ab
                 }
@@ -172,6 +225,8 @@ public class GUI extends Component {
 
         JComboBox<String> bundeslandDropdown =
                 new JComboBox<>(bundeslaender.keySet().toArray(new String[0]));
+
+
 
         Map<String, BundeslandInfo> finalBundeslaender = bundeslaender;
         bundeslandSuchfeld.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -225,7 +280,7 @@ public class GUI extends Component {
                 krankenkassen = new LinkedHashMap<>(); // Pfad fehlt – FALL 1 fängt das beim Submit ab
             } else {
                 try {
-                    krankenkassen = CsvReader.leseKrankenkassen(pfad);
+                    krankenkassen = CsvReader.leseKrankenkassen(pfad, jahr[0]);
                 } catch (IOException e) {
                     krankenkassen = new LinkedHashMap<>(); // Datei ungültig – FALL 2 fängt das beim Submit ab
                 }
@@ -287,6 +342,19 @@ public class GUI extends Component {
             public void changedUpdate(javax.swing.event.DocumentEvent e) {
                 aktualisieren();
             }
+        });
+
+
+        FiscalYearPreviousButton.addActionListener(e -> {
+            jahr[0] = Year.now().getValue() -1;
+            ladeBundeslaenderDropdown(bundeslandDropdown, jahr[0]);
+            ladeKrankenkassenDropdown(KrankenkassenDropdown, jahr[0]);
+        });
+
+        FiscalYearCurrentButton.addActionListener(e -> {
+            jahr[0] = Year.now().getValue();
+            ladeBundeslaenderDropdown(bundeslandDropdown, jahr[0]);
+            ladeKrankenkassenDropdown(KrankenkassenDropdown, jahr[0]);
         });
 
         // Add field for input number of children

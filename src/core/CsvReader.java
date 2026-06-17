@@ -1,10 +1,11 @@
 package core;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 
 public class CsvReader {
 
@@ -22,7 +23,8 @@ public class CsvReader {
 
         Map<String, Double> daten = new HashMap<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(dateipfad))) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(dateipfad), StandardCharsets.UTF_8))) {
 
             // Header-Zeile überspringen
             String header = br.readLine();
@@ -84,14 +86,16 @@ public class CsvReader {
      * Nutzt Spalte 1 (Name) und Spalten 2+3 (Gesamt + Zusatz)
      *
      * @param dateipfad Pfad zur CSV-Datei
+     * @param jahr jahr als Filter-Option in der Datei.
      * @return HashMap mit Krankenkasse -> KrankenkassenInfo
      * @throws IOException wenn Datei nicht gefunden
      */
-    public static Map<String, Sozialabgabenrechner.KrankenkassenInfo> leseKrankenkassen(String dateipfad) throws IOException {
+    public static Map<String, Sozialabgabenrechner.KrankenkassenInfo> leseKrankenkassen(String dateipfad, int jahr) throws IOException {
 
         Map<String, Sozialabgabenrechner.KrankenkassenInfo> daten = new HashMap<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(dateipfad))) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(dateipfad), StandardCharsets.UTF_8))) {
 
             // Header überspringen
             String header = br.readLine();
@@ -108,20 +112,30 @@ public class CsvReader {
                 // An Komma oder Tab splitten (Regex: [,\t]+ = Kommas oder Tabs)
                 String[] teile = zeile.split("[,\t]+");
 
-                // Validierung: Mindestens 3 Spalten?
-                if (teile.length < 3) {
+                // Validierung: Mindestens 4 Spalten?
+                if (teile.length < 4) {
                     System.err.println("Überspringe ungültige Zeile: " + zeile);
-                    continue;  // Zeile überspringen, nicht abbrechen
+                    continue;
                 }
 
                 // Spalte 1: Krankenkasse (Key)
                 String name = teile[0].trim();
 
-                // Spalte 2: Gesamtbeitrag (mit % und Leerzeichen)
-                String gesamtStr = teile[1].trim().replace("%", "").trim();
+                // Spalte 2: Jahr-Filter
+                int zeilenJahr;
+                try {
+                    zeilenJahr = Integer.parseInt(teile[1].trim());
+                } catch (NumberFormatException e) {
+                    System.err.println("Ungültiges Jahr in Zeile: " + zeile);
+                    continue;
+                }
+                if (zeilenJahr != jahr) continue;
 
-                // Spalte 3: Zusatzbeitrag (mit % und Leerzeichen)
-                String zusatzStr = teile[2].trim().replace("%", "").trim();
+                // Spalte 3: Gesamtbeitrag
+                String gesamtStr = teile[2].trim().replace("%", "").trim();
+
+                // Spalte 4: Zusatzbeitrag
+                String zusatzStr = teile[3].trim().replace("%", "").trim();
 
                 // Parsen
                 try {
@@ -188,7 +202,8 @@ public class CsvReader {
 
         Map<String, BundeslandInfo> daten = new HashMap<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(dateipfad))) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(dateipfad), StandardCharsets.UTF_8))) {
 
             // Header überspringen
             String header = br.readLine();

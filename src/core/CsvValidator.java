@@ -42,10 +42,16 @@ public class CsvValidator {
             if (zeile == null) return "Datei ist leer";
 
             String[] teile = zeile.split("[,\t]+");
-            if (teile.length < 3) return "Falsches Format (erwartet: Krankenkasse, Satz%, Zusatz%)";
+            if (teile.length < 4) return "Falsches Format (erwartet: Krankenkasse, Jahr, Satz%, Zusatz%)";
 
-            if (!teile[1].contains("%") || !teile[2].contains("%")) {
-                return "Keine Prozentwerte in Spalte 2/3 gefunden – falsche Datei?";
+            try {
+                Integer.parseInt(teile[1].trim());
+            } catch (NumberFormatException e) {
+                return "Spalte 2 enthält kein gültiges Jahr";
+            }
+
+            if (!teile[2].contains("%") || !teile[3].contains("%")) {
+                return "Keine Prozentwerte in Spalte 3/4 gefunden – falsche Datei?";
             }
             return null; // OK
 

@@ -1,73 +1,145 @@
-Krankenkasse,Beitragssatz 2026, Zusatzbeitrag 2026
-AOK Baden-Württemberg,	17.59%,	2.99%
-AOK Bayern,	17.29%,	2.69%
-AOK Bremen/Bremerhaven,	17.89%,	3.29%
-AOK Hessen,	17.58%,	2.98%
-AOK Niedersachsen,	17.58%,	2.98%
-AOK Nordost,	18.10%,	3.50%
-AOK NORDWEST,	17.59%,	2.99%
-AOK PLUS,	17.70%,	3.10%
-AOK Rheinland-Pfalz/Saarland,	17.07%,	2.47%
-AOK Rheinland/Hamburg,	17.89%,	3.29%
-AOK Sachsen-Anhalt,	17.49%,	2.89%
-Audi BKK,	17.20%,	2.60%
-BAHN-BKK,	18.25%,	3.65%
-BARMER,	17.89%,	3.29%
-BERGISCHE Krankenkasse,	18.39%,	3.79%
-Bertelsmann BKK,	17.80%,	3.20%
-BIG direkt gesund,	18.29%,	3.69%
-BKK24,	18.99%,	4.39%
-BKK Akzo Nobel Bayern,	17.99%,	3.39%
-BKK Diakonie,	18.40%,	3.80%
-BKK DürkoppAdler,	18.48%,	3.88%
-BKK EUREGIO,	17.99%,	3.39%
-BKK exklusiv,	18.09%,	3.49%
-BKK Faber-Castell & Partner,	17.08%,	2.48%
-BKK firmus,	16.78%,	2.18%
-BKK Freudenberg,	17.59%,	2.99%
-BKK GILDEMEISTER SEIDENSTICKER,	18.00%,	3.40%
-BKK Herkules,	18.98%,	4.38%
-BKK Linde,	17.59%,	2.99%
-bkk melitta hmr,	18.50%,	3.90%
-BKK mkk- meine Krankenkasse,	18.10%,	3.50%
-BKK PFAFF,	17.38%,	2.78%
-BKK Pfalz,	18.50%,	3.90%
-BKK ProVita,	18.39%,	3.79%
-BKK Public,	17.10%,	2.50%
-BKK Scheufelen,	18.59%,	3.99%
-BKK SBH,	17.39%,	2.79%
-BKK Technoform,	18.09%,	3.49%
-BKK VDN,	17.79%,	3.19%
-BKK VerbundPlus,	18.49%,	3.89%
-BKK WERRA-MEISSNER,	18.95%,	4.35%
-BKK Wirtschaft & Finanzen,	18.59%,	3.99%
-BOSCH BKK,	17.78%,	3.18%
-Continentale Betriebskrankenkasse,	17.93%,	3.33%
-DAK-Gesundheit,	17.80%,	3.20%
-Debeka BKK,	17.85%,	3.25%
-energie-BKK,	18.58%, 3.98%
-Heimat Krankenkasse,	18.50%,	3.90%
-HEK-Hanseatische Krankenkasse,	17.49%,	2.89%
-hkk Krankenkasse,	17.19%,	2.59%
-IKK - Die Innovationskasse,	18.90%,	4.30%
-IKK Brandenburg und Berlin,	18.95%,	4.35%
-IKK classic,	18.00%,	3.40%
-IKK gesund plus,	17.99%,	3.39%
-IKK Südwest,	18.47%,	3.87%
-KKH Kaufmännische Krankenkasse,	18.38%,	3.78%
-Knappschaft,	18.90%,	4.30%
-mhplus BKK,	18.46%,	3.86%
-Mobil Krankenkasse,	18.49%,	3.89%
-Novitas BKK,	18.20%,	3.60%
-pronova BKK,	18.30%,	3.70%
-R + V Betriebskrankenkasse,	18.09%,	3.49%
-Salus BKK,	17.89%,	3.29%
-SBK,	18.40%,	3.80%
-SECURVITA Krankenkasse,	18.50%,	3.90%
-SKD BKK,	17.58%,	2.98%
-Techniker Krankenkasse,	17.29%,	2.69%
-TUI BKK,	17.10%,	2.50%
-VIACTIV Krankenkasse,	18.79%,	4.19%
-vivida bkk,	18.39%,	3.79%
-WMF BKK,	17.45%,	2.85%
-ZF BKK,	18.00%,	3.40%
+Krankenkasse,Jahr,Beitragssatz,Zusatzbeitrag
+AOK Baden-Württemberg,2025,17.20%,2.60%
+AOK Baden-Württemberg,2026,17.59%,2.99%
+AOK Bayern,2025,17.29%,2.69%
+AOK Bayern,2026,17.29%,2.69%
+AOK Bremen/Bremerhaven,2025,17.09%,2.49%
+AOK Bremen/Bremerhaven,2026,17.89%,3.29%
+AOK Hessen,2025,17.09%,2.49%
+AOK Hessen,2026,17.58%,2.98%
+AOK Niedersachsen,2025,17.30%,2.70%
+AOK Niedersachsen,2026,17.58%,2.98%
+AOK Nordost,2025,18.10%,3.50%
+AOK Nordost,2026,18.10%,3.50%
+AOK NORDWEST,2025,17.39%,2.79%
+AOK NORDWEST,2026,17.59%,2.99%
+AOK PLUS,2025,17.70%,3.10%
+AOK PLUS,2026,17.70%,3.10%
+AOK Rheinland-Pfalz/Saarland,2025,17.07%,2.47%
+AOK Rheinland-Pfalz/Saarland,2026,17.07%,2.47%
+AOK Rheinland/Hamburg,2025,17.59%,2.99%
+AOK Rheinland/Hamburg,2026,17.89%,3.29%
+AOK Sachsen-Anhalt,2025,17.10%,2.50%
+AOK Sachsen-Anhalt,2026,17.49%,2.89%
+Audi BKK,2025,17.00%,2.40%
+Audi BKK,2026,17.20%,2.60%
+BAHN-BKK,2025,18.00%,3.40%
+BAHN-BKK,2026,18.25%,3.65%
+BARMER,2025,17.89%,3.29%
+BARMER,2026,17.89%,3.29%
+BERGISCHE Krankenkasse,2025,17.55%,2.95%
+BERGISCHE Krankenkasse,2026,18.39%,3.79%
+Bertelsmann BKK,2025,17.80%,3.20%
+Bertelsmann BKK,2026,17.80%,3.20%
+BIG direkt gesund,2025,17.99%,3.39%
+BIG direkt gesund,2026,18.29%,3.69%
+BKK24,2025,18.99%,4.39%
+BKK24,2026,18.99%,4.39%
+BKK Akzo Nobel Bayern,2025,17.99%,3.39%
+BKK Akzo Nobel Bayern,2026,17.99%,3.39%
+BKK Diakonie,2025,18.40%,3.80%
+BKK Diakonie,2026,18.40%,3.80%
+BKK DürkoppAdler,2025,18.48%,3.88%
+BKK DürkoppAdler,2026,18.48%,3.88%
+BKK EUREGIO,2025,17.99%,3.39%
+BKK EUREGIO,2026,17.99%,3.39%
+BKK exklusiv,2025,16.99%,2.39%
+BKK exklusiv,2026,18.09%,3.49%
+BKK Faber-Castell & Partner,2025,16.78%,2.18%
+BKK Faber-Castell & Partner,2026,17.08%,2.48%
+BKK firmus,2025,16.78%,2.18%
+BKK firmus,2026,16.78%,2.18%
+BKK Freudenberg,2025,17.09%,2.49%
+BKK Freudenberg,2026,17.59%,2.99%
+BKK GILDEMEISTER SEIDENSTICKER,2025,18.00%,3.40%
+BKK GILDEMEISTER SEIDENSTICKER,2026,18.00%,3.40%
+BKK Herkules,2025,18.98%,4.38%
+BKK Herkules,2026,18.98%,4.38%
+BKK Linde,2025,17.59%,2.99%
+BKK Linde,2026,17.59%,2.99%
+bkk melitta hmr,2025,18.10%,3.50%
+bkk melitta hmr,2026,18.50%,3.90%
+BKK mkk- meine Krankenkasse,2025,18.10%,3.50%
+BKK mkk- meine Krankenkasse,2026,18.10%,3.50%
+BKK PFAFF,2025,17.38%,2.78%
+BKK PFAFF,2026,17.38%,2.78%
+BKK Pfalz,2025,18.50%,3.90%
+BKK Pfalz,2026,18.50%,3.90%
+BKK ProVita,2025,17.49%,2.89%
+BKK ProVita,2026,18.39%,3.79%
+BKK Public,2025,16.90%,2.30%
+BKK Public,2026,17.10%,2.50%
+BKK Scheufelen,2025,18.00%,3.40%
+BKK Scheufelen,2026,18.59%,3.99%
+BKK SBH,2025,17.04%,2.44%
+BKK SBH,2026,17.39%,2.79%
+BKK Technoform,2025,18.09%,3.49%
+BKK Technoform,2026,18.09%,3.49%
+BKK VDN,2025,17.79%,3.19%
+BKK VDN,2026,17.79%,3.19%
+BKK VerbundPlus,2025,18.49%,3.89%
+BKK VerbundPlus,2026,18.49%,3.89%
+BKK WERRA-MEISSNER,2025,17.99%,3.39%
+BKK WERRA-MEISSNER,2026,18.95%,4.35%
+BKK Wirtschaft & Finanzen,2025,18.59%,3.99%
+BKK Wirtschaft & Finanzen,2026,18.59%,3.99%
+BOSCH BKK,2025,17.28%,2.68%
+BOSCH BKK,2026,17.78%,3.18%
+Continentale Betriebskrankenkasse,2025,17.93%,3.33%
+Continentale Betriebskrankenkasse,2026,17.93%,3.33%
+DAK-Gesundheit,2025,17.40%,2.80%
+DAK-Gesundheit,2026,17.80%,3.20%
+Debeka BKK,2025,17.85%,3.25%
+Debeka BKK,2026,17.85%,3.25%
+energie-BKK,2025,17.58%,2.98%
+energie-BKK,2026,18.58%,3.98%
+Heimat Krankenkasse,2025,17.70%,3.10%
+Heimat Krankenkasse,2026,18.50%,3.90%
+HEK-Hanseatische Krankenkasse,2025,17.10%,2.50%
+HEK-Hanseatische Krankenkasse,2026,17.49%,2.89%
+hkk Krankenkasse,2025,16.79%,2.19%
+hkk Krankenkasse,2026,17.19%,2.59%
+IKK - Die Innovationskasse,2025,18.90%,4.30%
+IKK - Die Innovationskasse,2026,18.90%,4.30%
+IKK Brandenburg und Berlin,2025,18.95%,4.35%
+IKK Brandenburg und Berlin,2026,18.95%,4.35%
+IKK classic,2025,18.00%,3.40%
+IKK classic,2026,18.00%,3.40%
+IKK gesund plus,2025,17.99%,3.39%
+IKK gesund plus,2026,17.99%,3.39%
+IKK Südwest,2025,17.85%,3.25%
+IKK Südwest,2026,18.47%,3.87%
+KKH Kaufmännische Krankenkasse,2025,18.38%,3.78%
+KKH Kaufmännische Krankenkasse,2026,18.38%,3.78%
+Knappschaft,2025,19.00%,4.40%
+Knappschaft,2026,18.90%,4.30%
+mhplus BKK,2025,17.89%,3.29%
+mhplus BKK,2026,18.46%,3.86%
+Mobil Krankenkasse,2025,18.49%,3.89%
+Mobil Krankenkasse,2026,18.49%,3.89%
+Novitas BKK,2025,17.58%,2.98%
+Novitas BKK,2026,18.20%,3.60%
+pronova BKK,2025,17.80%,3.20%
+pronova BKK,2026,18.30%,3.70%
+R + V Betriebskrankenkasse,2025,17.56%,2.96%
+R + V Betriebskrankenkasse,2026,18.09%,3.49%
+Salus BKK,2025,17.59%,2.99%
+Salus BKK,2026,17.89%,3.29%
+SBK,2025,18.40%,3.80%
+SBK,2026,18.40%,3.80%
+SECURVITA Krankenkasse,2025,18.50%,3.90%
+SECURVITA Krankenkasse,2026,18.50%,3.90%
+SKD BKK,2025,17.08%,2.48%
+SKD BKK,2026,17.58%,2.98%
+Techniker Krankenkasse,2025,17.05%,2.45%
+Techniker Krankenkasse,2026,17.29%,2.69%
+TUI BKK,2025,17.10%,2.50%
+TUI BKK,2026,17.10%,2.50%
+VIACTIV Krankenkasse,2025,16.87%,3.27%
+VIACTIV Krankenkasse,2026,18.79%,4.19%
+vivida bkk,2025,18.39%,3.79%
+vivida bkk,2026,18.39%,3.79%
+WMF BKK,2025,17.05%,2.45%
+WMF BKK,2026,17.45%,2.85%
+ZF BKK,2025,18.00%,3.40%
+ZF BKK,2026,18.00%,3.40%
