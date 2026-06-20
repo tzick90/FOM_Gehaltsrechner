@@ -1,5 +1,12 @@
 package util;
 
+/**
+ * Daten-Klasse zur Kapselung aller Berechnungsergebnisse eines Gehaltsrechnungslaufs.
+ * Wird als einheitlicher Rückgabetyp sowohl vom Vollmodus (Abgabenrechner)
+ * als auch vom Projektmodus (FOMGehaltsrechner) verwendet, sodass die GUI-Ausgabe
+ * unabhängig vom gewählten Modus identisch implementiert werden kann.
+ */
+
 public class Ergebnis {
     private double brutto;
     private double nettoMonat;
@@ -18,21 +25,21 @@ public class Ergebnis {
     private double pvBeitrag;
     // Konstruktor – exakt 12 Parameter, exakt diese Reihenfolge
     public Ergebnis(
-            double brutto,             // 1.
-            double nettoMonat,         // 2.
-            double lohnsteuerJahr,     // 3.
-            double lohnsteuerMonat,    // 4.
-            double kirchensteuerJahr,  // 5.
-            double kirchensteuerMonat, // 6.
-            double soliJahr,           // 7.
-            double soliMonat,          // 8.
+            double brutto,
+            double nettoMonat,
+            double lohnsteuerJahr,
+            double lohnsteuerMonat,
+            double kirchensteuerJahr,
+            double kirchensteuerMonat,
+            double soliJahr,
+            double soliMonat,
             double kvBeitrag,
             double kvZusatz,
-            double kvBasisBetrag,      // 9.
-            double kvZusatzBetrag,  // 9.
-            double rvBeitrag,          // 10.
-            double avBeitrag,          // 11.
-            double pvBeitrag           // 12.
+            double kvBasisBetrag,
+            double kvZusatzBetrag,
+            double rvBeitrag,
+            double avBeitrag,
+            double pvBeitrag
     ) {
         this.brutto             = brutto;
         this.nettoMonat         = nettoMonat;

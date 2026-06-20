@@ -6,7 +6,6 @@ import core.Steuerabgabenrechner;
 
 
 import java.io.IOException;
-import java.time.Year;
 import java.util.Map;
 
 public class Abgabenrechner {
@@ -14,20 +13,20 @@ public class Abgabenrechner {
      * Berechnet Netto aus Brutto für GUI
      *
      *  CSV-Pfade:
-     * @param steuerSaetzePfad xx
-     * @param einkommenssteuerGrenzenPfad
-     * @param bundeslandUndKirchensteuerPfad
-     * @param steuerPauschalenPfad
-     * @param krankenkassenPfad
-     * @param sozialversicherungssaetzePfad
+     * @param steuerSaetzePfad Pfad zur CSV mit Steuersätzen (u.a. Solidaritätszuschlag)
+     * @param einkommenssteuerGrenzenPfad Pfad zur CSV mit Einkommensteuer-Zonengrenzen (§32a EStG)
+     * @param bundeslandUndKirchensteuerPfad Pfad zur CSV mit Bundesland- und Kirchensteuersätzen
+     * @param steuerPauschalenPfad Pfad zur CSV mit Pauschbeträgen (Werbungskosten, Sonderausgaben etc.)
+     * @param krankenkassenPfad Pfad zur CSV mit Krankenkassen-Beitragssätzen
+     * @param sozialversicherungssaetzePfad Pfad zur CSV mit Sozialversicherungssätzen und Beitragsbemessungsgrenzen
      *
      *  Werte für Berechnung:
      * @param brutto Brutto-Gehalt
-     * @param steuerklasse Steuerklasse (1-6)
-     * @param gewähltesBundesland Bundesland (für Kirchensteuer)
-     * @param kirchenmitglied true = Kirchenmitglied
+     * @param steuerklasse Steuerklasse als römische Ziffer ("I" bis "VI")
+     * @param gewaehltesBundesland Bundesland (für Kirchensteuer)
+     * @param kirchenmitglied "Ja" oder "Nein" (wird intern in boolean konvertiert)
      * @param jahr Jahr (aktuelles oder vorheriges Jahr)
-     * @param gewählteKK die gewählte Krankenkasse
+     * @param gewaehlteKK die gewählte Krankenkasse
      * @param kinderanzahl die Anzahl der Kinder
      * @param alter die Angabe des Alters
      * @return Ergebnis-Objekt mit allen Berechnungen
@@ -37,10 +36,10 @@ public class Abgabenrechner {
             double brutto,
             String steuerklasse,
             String kirchenmitglied,
-            String gewähltesBundesland,
+            String gewaehltesBundesland,
             int kinderanzahl,
             int jahr,
-            String gewählteKK,
+            String gewaehlteKK,
             int alter,
             // CSV-Pfade:
             String steuerSaetzePfad,
@@ -57,12 +56,7 @@ public class Abgabenrechner {
 
 
         //steuerrechner erwartet boolean kirchenmitglied, GUI liefert String -> Folge: in Boolean übersetzen
-        boolean istKirchenmitglied = false;
-        if (kirchenmitglied.equals("Ja")) {
-            istKirchenmitglied = true;
-        } else {
-            istKirchenmitglied = false;
-        }
+        boolean istKirchenmitglied = kirchenmitglied.equals("Ja");
 
         Map<String, Double> svSaetze;
         Map<String, Sozialabgabenrechner.KrankenkassenInfo> krankenkassen;
@@ -136,7 +130,7 @@ public class Abgabenrechner {
         // ========================================
 
         // 1. Krankenversicherung
-        Sozialabgabenrechner.KrankenkassenInfo kkInfo = krankenkassen.get(gewählteKK);
+        Sozialabgabenrechner.KrankenkassenInfo kkInfo = krankenkassen.get(gewaehlteKK);
         double kvZusatz = kkInfo.getZusatzbeitrag();  // z.B. 2.69%
 
         double kvBetrag = Sozialabgabenrechner.berechneKrankenversicherung(
@@ -192,11 +186,6 @@ public class Abgabenrechner {
         // STEUERN BERECHNEN
         // ========================================
 
-        // Einkommensteuer-Grenzen laden
-        //double grundfreibetrag = einkommensteuerGrenzen.get("grundfreibetrag");
-        //double zone1Ende = einkommensteuerGrenzen.get("zone1_ende");
-        //double zone2Ende = einkommensteuerGrenzen.get("zone2_ende");
-        //double zone3Ende = einkommensteuerGrenzen.get("zone3_ende");
 
         // Lohnsteuer berechnen (nach §32a EStG) - JAHR
         // Hier wird sozialabgabenGesamt übergeben!
@@ -274,7 +263,7 @@ public class Abgabenrechner {
                 break;
 
             default:
-                System.err.println("Ungültige Steuerklasse!");
+                //System.err.println("Ungültige Steuerklasse!");
                 return null;
         }
         double lohnsteuerMonat = lohnsteuerJahr / 12;
@@ -289,7 +278,7 @@ public class Abgabenrechner {
         double soliMonat = soliJahr / 12;
 
         // Kirchensteuer berechnen - JAHR
-        CsvReader.BundeslandInfo blInfo = bundeslaender.get(gewähltesBundesland);
+        CsvReader.BundeslandInfo blInfo = bundeslaender.get(gewaehltesBundesland);
         double kirchensteuersatz = blInfo.getKirchensteuer();
         double kirchensteuerJahr = Steuerabgabenrechner.berechneKirchensteuerJahr(
                 lohnsteuerJahr,
@@ -299,11 +288,9 @@ public class Abgabenrechner {
         double kirchensteuerMonat = kirchensteuerJahr / 12;
 
         // Steuern gesamt
-        double steuernGesamtJahr = lohnsteuerJahr + kirchensteuerJahr;
         double steuernGesamtMonat = lohnsteuerMonat + kirchensteuerMonat;
 
         double nettoMonat = brutto - steuernGesamtMonat - sozialabgabenGesamt;
-        //double nettoJahr =
 
 
         // ========================================
@@ -320,7 +307,6 @@ public class Abgabenrechner {
                 kirchensteuerMonat,
                 soliJahr,
                 soliMonat,
-                //kirchensteuer,
                 kvBetrag,
                 kvZusatz,
                 kvBasisBetrag,

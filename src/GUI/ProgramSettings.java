@@ -11,13 +11,6 @@ import core.CsvValidator;
 
 public class ProgramSettings extends JDialog {
 
-    public ProgramSettings(Frame owner) {
-        super(owner, "Einstellungen",true);
-        setSize(700,500);
-        setLocationRelativeTo(owner);
-        setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-    }
-
 
     private static final String SETTINGS_FILE = "settings.properties";
 
@@ -41,9 +34,10 @@ public class ProgramSettings extends JDialog {
         tabs.addTab("Sozialversicherung-CSVs", createSozialPanel());
         tabs.addTab("Modus", createModusPanel());
 
-        //New Save-Button für Dateipfade:
+
         dateiPfadeLaden();
 
+        //New Save-Button für Dateipfade & Einstellungen (Modus):
         JButton speichernButton = new JButton("Pfade speichern & Einstellungen anwenden");
         speichernButton.addActionListener(e -> dateiPfadeSpeichern());
 
@@ -134,7 +128,7 @@ public class ProgramSettings extends JDialog {
         JPanel panel = new JPanel(new GridLayout(2,1,5,5));
 
         professionalModeRadio = new JRadioButton("Für eine komplette Abgabenberechnung");
-        fomModeRadio = new JRadioButton("Projektmodus (vereinfachte Berechnung");
+        fomModeRadio = new JRadioButton("Projektmodus (vereinfachte Berechnung)");
 
         ButtonGroup modusGruppe = new ButtonGroup();
         modusGruppe.add(professionalModeRadio);
@@ -178,7 +172,8 @@ public class ProgramSettings extends JDialog {
                     "Erfolg",
                     JOptionPane.INFORMATION_MESSAGE);
 
-            // HIER_14 NEU – GUI neu aufbauen (z.B. bei Moduswechsel)
+            // Hier wird die GUI des Rechners neu geladen, in Abhängigkeit vom gewähltem Modus des Rechners.
+            // Auf diese Weise kann der Rechner beide Berechnungsmethoden auch über die GUI abdecken.
             SwingUtilities.invokeLater(GUI::buildGUI);
 
         } catch (IOException e) {
@@ -206,6 +201,9 @@ public class ProgramSettings extends JDialog {
             return;
         }
 
+        // Bekannte Einschränkung: Der gespeicherte Modus wird beim Programmstart
+        // nicht automatisch wiederhergestellt (Default ist immer Vollmodus).
+        // Innerhalb einer laufenden Session funktioniert die Moduswahl korrekt.
 
         String modus = properties.getProperty("FOM Projektmodus", "Professional-Modus");
         if (modus.equals("Projektmodus")) {

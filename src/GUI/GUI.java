@@ -24,7 +24,7 @@ import static GUI.ProgramSettings.*;
 
 public class GUI extends Component {
 
-    static int[] jahr = { Year.now().getValue() };
+    static int[] jahr = {Year.now().getValue()};
 
     static String formatEUR(double wert) {
         NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
@@ -82,14 +82,14 @@ public class GUI extends Component {
     }
 
 
-    static JMenuItem resetEingabe, einstellungen, beenden;
+    static JMenuItem einstellungen, beenden;
     static JFrame frame;
 
-    public void main(String[] args) {
-        SwingUtilities.invokeLater(GUI::buildGUI);   // HIER_12a
+    static void main(String[] args) {
+        SwingUtilities.invokeLater(GUI::buildGUI);
     }
 
-    public static void buildGUI() {                  // HIER_12b NEU
+    public static void buildGUI() {
 
         // Bestehendes Fenster schließen, falls vorhanden (z.B. bei Moduswechsel)
         if (frame != null) {
@@ -105,11 +105,9 @@ public class GUI extends Component {
         frame.setLayout(new BorderLayout(10, 10));
         frame.requestFocus();
 
-        JMenuBar BarMenu = new JMenuBar();
-        JMenu Menu = new JMenu("Datei");
+        JMenuBar barMenu = new JMenuBar();
+        JMenu menu = new JMenu("Datei");
 
-        resetEingabe = new JMenuItem("Reset Eingabe");
-        resetEingabe.addActionListener(new ActionHandler());
 
         einstellungen = new JMenuItem("Einstellungen");
         einstellungen.addActionListener(new ActionHandler());
@@ -118,16 +116,15 @@ public class GUI extends Component {
         beenden.addActionListener(new ActionHandler());
 
 
-        Menu.add(resetEingabe);
-        Menu.add(einstellungen);
-        Menu.add(beenden);
-        BarMenu.add(Menu);
+        menu.add(einstellungen);
+        menu.add(beenden);
+        barMenu.add(menu);
 
-        BarMenu.add(Box.createHorizontalGlue());
+        barMenu.add(Box.createHorizontalGlue());
         JLabel modusLabel = new JLabel("Modus: " + ProgramSettings.getModus() + " ");
-        BarMenu.add(modusLabel);
+        barMenu.add(modusLabel);
 
-        frame.setJMenuBar(BarMenu);
+        frame.setJMenuBar(barMenu);
 
             /*
             LEFT PANEL for INPUT
@@ -147,19 +144,19 @@ public class GUI extends Component {
              */
 
         // adding Radio-Button for fiscal year
-        JRadioButton FiscalYearPreviousButton = new JRadioButton("Letztes Fiskaljahr"); // TODO: hier kommt noch eine Klasse um dynamisch das lette und das aktuelle FY zu berechnen und hier als String-Wert wiederzugeben
-        FiscalYearPreviousButton.setMnemonic(KeyEvent.VK_L);
-        FiscalYearPreviousButton.setActionCommand("Letztes Fiskaljahr");
+        JRadioButton fiscalYearPreviousButton = new JRadioButton("Letztes Fiskaljahr");
+        fiscalYearPreviousButton.setMnemonic(KeyEvent.VK_L);
+        fiscalYearPreviousButton.setActionCommand("Letztes Fiskaljahr");
 
-        JRadioButton FiscalYearCurrentButton = new JRadioButton("Aktuelles Fiskaljahr");
-        FiscalYearCurrentButton.setMnemonic(KeyEvent.VK_A);
-        FiscalYearCurrentButton.setActionCommand("Aktuelles Fiskaljahr");
+        JRadioButton fiscalYearCurrentButton = new JRadioButton("Aktuelles Fiskaljahr");
+        fiscalYearCurrentButton.setMnemonic(KeyEvent.VK_A);
+        fiscalYearCurrentButton.setActionCommand("Aktuelles Fiskaljahr");
 
 
         // Grouping the RadioButtons
-        ButtonGroup FiscalYearButtonsGroup = new ButtonGroup();
-        FiscalYearButtonsGroup.add(FiscalYearPreviousButton);
-        FiscalYearButtonsGroup.add(FiscalYearCurrentButton);
+        ButtonGroup fiscalYearButtonsGroup = new ButtonGroup();
+        fiscalYearButtonsGroup.add(fiscalYearPreviousButton);
+        fiscalYearButtonsGroup.add(fiscalYearCurrentButton);
 
 
 
@@ -169,18 +166,17 @@ public class GUI extends Component {
              */
 
         JLabel salaryLabel = new JLabel("mon. Gehalt (Brutto)");
-        JTextField GrossSalaryField = new JTextField();
+        JTextField grossSalaryField = new JTextField();
 
         JButton submitButton = new JButton("Berechnen");
 
 
         // Field for Age input
         JLabel ageLabel = new JLabel("Alter:");
-        JTextField AgeInputField = new JTextField();
+        JTextField ageInputField = new JTextField();
 
 
-
-        // HIER_4 NEU: blAbkuerzungen jetzt VOR bundeslaender
+        // blAbkuerzungen jetzt VOR bundeslaender
         Map<String, String> blAbkuerzungen = Map.ofEntries(
                 Map.entry("bw", "Baden-Württemberg"),
                 Map.entry("by", "Bayern"),
@@ -208,7 +204,7 @@ public class GUI extends Component {
                 bundeslaender.put(bl, new BundeslandInfo(0, ""));
             }
         } else {
-            String pfad = ProgramSettings.getBundeslandUndKirchensteuerPfad();   // HIER_19
+            String pfad = ProgramSettings.getBundeslandUndKirchensteuerPfad();
             if (pfad.isBlank()) {
                 bundeslaender = new LinkedHashMap<>(); // Pfad fehlt – FALL 1 fängt das beim Submit ab
             } else {
@@ -225,7 +221,6 @@ public class GUI extends Component {
 
         JComboBox<String> bundeslandDropdown =
                 new JComboBox<>(bundeslaender.keySet().toArray(new String[0]));
-
 
 
         Map<String, BundeslandInfo> finalBundeslaender = bundeslaender;
@@ -275,7 +270,7 @@ public class GUI extends Component {
         if (projektmodus) {
             krankenkassen = new LinkedHashMap<>();
         } else {
-            String pfad = ProgramSettings.getKrankenkassenPfad();   // HIER_20
+            String pfad = ProgramSettings.getKrankenkassenPfad();
             if (pfad.isBlank()) {
                 krankenkassen = new LinkedHashMap<>(); // Pfad fehlt – FALL 1 fängt das beim Submit ab
             } else {
@@ -297,17 +292,17 @@ public class GUI extends Component {
         kkAbkürzungen.put("bkk", "BKK");
         kkAbkürzungen.put("hkk", "hkk");
 
-        JLabel KrankenkassenLabel = new JLabel("Krankenkasse:");
-        JTextField KrankenkassenSuchfeld = new JTextField(15);
+        JLabel krankenkassenLabel = new JLabel("Krankenkasse:");
+        JTextField krankenkassenSuchfeld = new JTextField(15);
 
-        JComboBox<String> KrankenkassenDropdown =
+        JComboBox<String> krankenkassenDropdown =
                 new JComboBox<>(krankenkassen.keySet().toArray(new String[0]));
 
 
         Map<String, Sozialabgabenrechner.KrankenkassenInfo> finalKrankenkassen = krankenkassen;
-        KrankenkassenSuchfeld.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+        krankenkassenSuchfeld.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             private void aktualisieren() {
-                String eingabe = KrankenkassenSuchfeld.getText().trim();
+                String eingabe = krankenkassenSuchfeld.getText().trim();
 
                 List<String> treffer = FuzzyMatcher.findeAlle(
                         eingabe,
@@ -315,19 +310,19 @@ public class GUI extends Component {
                         kkAbkürzungen
                 );
 
-                KrankenkassenDropdown.removeAllItems();
+                krankenkassenDropdown.removeAllItems();
 
                 if (eingabe.isEmpty()) {
                     for (String kk : finalKrankenkassen.keySet()) {
-                        KrankenkassenDropdown.addItem(kk);
+                        krankenkassenDropdown.addItem(kk);
                     }
                 } else {
                     for (String kk : treffer) {
-                        KrankenkassenDropdown.addItem(kk);
+                        krankenkassenDropdown.addItem(kk);
                     }
                 }
-                if (KrankenkassenDropdown.getItemCount() > 0) {
-                    KrankenkassenDropdown.setSelectedIndex(0);
+                if (krankenkassenDropdown.getItemCount() > 0) {
+                    krankenkassenDropdown.setSelectedIndex(0);
                 }
             }
 
@@ -345,21 +340,21 @@ public class GUI extends Component {
         });
 
 
-        FiscalYearPreviousButton.addActionListener(e -> {
-            jahr[0] = Year.now().getValue() -1;
+        fiscalYearPreviousButton.addActionListener(e -> {
+            jahr[0] = Year.now().getValue() - 1;
             ladeBundeslaenderDropdown(bundeslandDropdown, jahr[0]);
-            ladeKrankenkassenDropdown(KrankenkassenDropdown, jahr[0]);
+            ladeKrankenkassenDropdown(krankenkassenDropdown, jahr[0]);
         });
 
-        FiscalYearCurrentButton.addActionListener(e -> {
+        fiscalYearCurrentButton.addActionListener(e -> {
             jahr[0] = Year.now().getValue();
             ladeBundeslaenderDropdown(bundeslandDropdown, jahr[0]);
-            ladeKrankenkassenDropdown(KrankenkassenDropdown, jahr[0]);
+            ladeKrankenkassenDropdown(krankenkassenDropdown, jahr[0]);
         });
 
         // Add field for input number of children
         JLabel numberOfChildrenLabel = new JLabel("Anzahl Kinder:");
-        JTextField NumberOfChildrenField = new JTextField();
+        JTextField numberOfChildrenField = new JTextField();
 
 
             /*
@@ -370,7 +365,7 @@ public class GUI extends Component {
                 ? FOMGehaltsrechner.GUELTIGE_STEUERKLASSEN
                 : new String[]{"I", "II", "III", "IV", "V", "VI"};
         JLabel steuerKlasseLabel = new JLabel("Steuerklasse:");
-        JComboBox<String> SteuerKlasseDropdown = new JComboBox<>(steuerKlasse);
+        JComboBox<String> steuerKlasseDropdown = new JComboBox<>(steuerKlasse);
 
 
             /*
@@ -379,20 +374,20 @@ public class GUI extends Component {
 
         String[] kirchenMitgliedOptions = {"Nein", "Ja"};
         JLabel kirchenMitglied = new JLabel("Kirchenmitglied:");
-        JComboBox<String> KirchenMitgliedDropdown = new JComboBox<>(kirchenMitgliedOptions);
+        JComboBox<String> kirchenMitgliedDropdown = new JComboBox<>(kirchenMitgliedOptions);
 
-        // HIER_7 NEU
+        //
         JLabel kvZusatzLabel = new JLabel("KV-Zusatzbeitrag (%):");
-        JTextField KvZusatzbeitragField = new JTextField("1,3");
+        JTextField kvZusatzbeitragField = new JTextField("1,3");
 
 
         // Add components to left panel
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
-        leftPanel.add(FiscalYearPreviousButton, gbc);
+        leftPanel.add(fiscalYearPreviousButton, gbc);
         gbc.gridy++;
-        leftPanel.add(FiscalYearCurrentButton, gbc);
+        leftPanel.add(fiscalYearCurrentButton, gbc);
 
         gbc.gridwidth = 1;
         gbc.gridy++;
@@ -412,7 +407,7 @@ public class GUI extends Component {
         gbc.gridx = 0;
         leftPanel.add(salaryLabel, gbc);
         gbc.gridx = 1;
-        leftPanel.add(GrossSalaryField, gbc);
+        leftPanel.add(grossSalaryField, gbc);
 
         gbc.gridwidth = 1;
         gbc.gridy++;
@@ -428,17 +423,16 @@ public class GUI extends Component {
         gbc.gridwidth = 1;
         gbc.gridy++;
         gbc.gridx = 0;
-        gbc.gridwidth = 1;
         leftPanel.add(steuerKlasseLabel, gbc);
         gbc.gridx = 1;
-        leftPanel.add(SteuerKlasseDropdown, gbc);
+        leftPanel.add(steuerKlasseDropdown, gbc);
 
         gbc.gridy++;
         gbc.gridx = 0;
         gbc.gridwidth = 1;
         leftPanel.add(kirchenMitglied, gbc);
         gbc.gridx = 1;
-        leftPanel.add(KirchenMitgliedDropdown, gbc);
+        leftPanel.add(kirchenMitgliedDropdown, gbc);
 
         gbc.gridy++;
         gbc.gridx = 0;
@@ -466,35 +460,34 @@ public class GUI extends Component {
         gbc.gridwidth = 1;
         gbc.gridy++;
         gbc.gridx = 0;
-        gbc.gridwidth = 1;
-        leftPanel.add(KrankenkassenLabel, gbc);
+        leftPanel.add(krankenkassenLabel, gbc);
         gbc.gridx = 1;
-        leftPanel.add(KrankenkassenSuchfeld, gbc);
+        leftPanel.add(krankenkassenSuchfeld, gbc);
 
         gbc.gridy++;
         gbc.gridx = 0;
         gbc.gridwidth = 2;
-        leftPanel.add(KrankenkassenDropdown, gbc);
+        leftPanel.add(krankenkassenDropdown, gbc);
 
-        // HIER_8 NEU
+        // ---
         gbc.gridy++;
         gbc.gridx = 0;
         gbc.gridwidth = 1;
         leftPanel.add(kvZusatzLabel, gbc);
         gbc.gridx = 1;
-        leftPanel.add(KvZusatzbeitragField, gbc);
+        leftPanel.add(kvZusatzbeitragField, gbc);
 
         gbc.gridy++;
         gbc.gridx = 0;
         leftPanel.add(ageLabel, gbc);
         gbc.gridx = 1;
-        leftPanel.add(AgeInputField, gbc);
+        leftPanel.add(ageInputField, gbc);
 
         gbc.gridy++;
         gbc.gridx = 0;
         leftPanel.add(numberOfChildrenLabel, gbc);
         gbc.gridx = 1;
-        leftPanel.add(NumberOfChildrenField, gbc);
+        leftPanel.add(numberOfChildrenField, gbc);
 
 
         gbc.gridy++;
@@ -523,9 +516,9 @@ public class GUI extends Component {
             int nKids;
             int chosenAge;
             try {
-                salary    = Double.parseDouble(GrossSalaryField.getText().trim().replace(",", "."));
-                nKids     = Integer.parseInt(NumberOfChildrenField.getText().trim());
-                chosenAge = Integer.parseInt(AgeInputField.getText().trim());
+                salary = Double.parseDouble(grossSalaryField.getText().trim().replace(",", "."));
+                nKids = Integer.parseInt(numberOfChildrenField.getText().trim());
+                chosenAge = Integer.parseInt(ageInputField.getText().trim());
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(frame,
                         "Bitte gültige Zahlen für Gehalt, Alter und Anzahl Kinder eingeben!",
@@ -542,10 +535,26 @@ public class GUI extends Component {
             }
             String chosenState = selectedState.toString().trim();
 
-            String chosenTaxClass = SteuerKlasseDropdown.getSelectedItem().toString().trim();
-            String churchMembership = KirchenMitgliedDropdown.getSelectedItem().toString().trim();
+            Object selectedTaxClass = steuerKlasseDropdown.getSelectedItem();
+            if (selectedTaxClass == null) {
+                JOptionPane.showMessageDialog(frame,
+                        "Bitte eine Steuerklasse auswählen!",
+                        "Fehler", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String chosenTaxClass = selectedTaxClass.toString().trim();
 
-            // todo erklären!
+            Object selectedChurch = kirchenMitgliedDropdown.getSelectedItem();
+            if (selectedChurch == null) {
+                JOptionPane.showMessageDialog(frame,
+                        "Bitte gib an, ob eine Kirchenmitgliedschaft besteht!",
+                        "Fehler", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String churchMembership = selectedChurch.toString().trim();
+
+
+            // Eingabewerte dürfen nicht negativ sein (z.B. negatives Gehalt ist unplausibel)
             if (nKids < 0 || salary < 0 || chosenAge < 0) {
                 JOptionPane.showMessageDialog(frame,
                         "Diese Eingabe darf nicht negativ sein!",
@@ -561,7 +570,7 @@ public class GUI extends Component {
                 // ===== PROJEKTMODUS =====
                 double kvZusatzbeitrag;
                 try {
-                    kvZusatzbeitrag = Double.parseDouble(KvZusatzbeitragField.getText().trim().replace(",", "."));
+                    kvZusatzbeitrag = Double.parseDouble(kvZusatzbeitragField.getText().trim().replace(",", "."));
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(frame,
                             "Bitte einen gültigen KV-Zusatzbeitrag eingeben (z.B. 1,3)!",
@@ -587,7 +596,7 @@ public class GUI extends Component {
                 // ===== Professional Mode =====
 
 
-                Object selectedKK = KrankenkassenDropdown.getSelectedItem();
+                Object selectedKK = krankenkassenDropdown.getSelectedItem();
                 if (selectedKK == null) {
                     JOptionPane.showMessageDialog(frame,
                             "Bitte eine gültige Krankenkasse auswählen!",
@@ -595,8 +604,8 @@ public class GUI extends Component {
                     return;
                 }
                 chosenHealthInsurance = selectedKK.toString().trim();
-                fiscalYear = FiscalYearPreviousButton.isSelected() ? Year.now().getValue() - 1 :
-                        FiscalYearCurrentButton.isSelected() ? Year.now().getValue() : 0;
+                fiscalYear = fiscalYearPreviousButton.isSelected() ? Year.now().getValue() - 1 :
+                        fiscalYearCurrentButton.isSelected() ? Year.now().getValue() : 0;
 
                 List<String> fehlendePfade = ProgramSettings.getFehlendePfade();
                 if (!fehlendePfade.isEmpty()) {
@@ -728,14 +737,14 @@ public class GUI extends Component {
 
 
         if (projektmodus) {
-            FiscalYearPreviousButton.setVisible(false);
-            FiscalYearCurrentButton.setVisible(false);
-            KrankenkassenLabel.setVisible(false);
-            KrankenkassenSuchfeld.setVisible(false);
-            KrankenkassenDropdown.setVisible(false);
+            fiscalYearPreviousButton.setVisible(false);
+            fiscalYearCurrentButton.setVisible(false);
+            krankenkassenLabel.setVisible(false);
+            krankenkassenSuchfeld.setVisible(false);
+            krankenkassenDropdown.setVisible(false);
         } else {
             kvZusatzLabel.setVisible(false);
-            KvZusatzbeitragField.setVisible(false);
+            kvZusatzbeitragField.setVisible(false);
         }
 
         frame.setVisible(true);

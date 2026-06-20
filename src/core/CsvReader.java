@@ -4,8 +4,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 
 public class CsvReader {
 
@@ -25,9 +23,6 @@ public class CsvReader {
 
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(new FileInputStream(dateipfad), StandardCharsets.UTF_8))) {
-
-            // Header-Zeile überspringen
-            String header = br.readLine();
 
             // Jede Zeile lesen
             String zeile;
@@ -245,6 +240,8 @@ public class CsvReader {
                 //Spalte 3: Region
                 String region = teile[3].trim();
 
+
+                // Validierung, ob die Excel auch die richtigen Inhalte aufweist.
                 try {
                     double kirchensteuer = Double.parseDouble(kirchensteuerStr);
                     BundeslandInfo info = new BundeslandInfo(kirchensteuer, region);

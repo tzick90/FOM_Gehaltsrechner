@@ -35,9 +35,9 @@ public class Sozialabgabenrechner {
      * Arbeitnehmer zahlt 50% des Gesamtbeitragssatzes
      *
      * @param bruttogehalt Bruttogehalt, monatlich
-     * @param kvBasis KV Basis-Beitragssatz (14,6%)
-     * @param kvZusatz KV Zusatzbeitrag der Krankenkasse (z.B. 2,69%)
-     * @param bbgKV Beitragsbemessungsgrenze KV
+     * @param kvBasis      KV Basis-Beitragssatz (14,6%)
+     * @param kvZusatz     KV Zusatzbeitrag der Krankenkasse (z.B. 2,69%)
+     * @param bbgKV        Beitragsbemessungsgrenze KV
      * @return KV-Beitrag Arbeitnehmeranteil in EUR
      */
 
@@ -54,6 +54,7 @@ public class Sozialabgabenrechner {
 
         return bemessungsgrundlage * kvSatzAN / 100;
     }
+
     public static double berechneKvBasisAnteil(double bruttogehalt, double kvBasis, double bbgKV) {
         return Math.min(bruttogehalt, bbgKV) * (kvBasis / 2) / 100;
     }
@@ -63,12 +64,12 @@ public class Sozialabgabenrechner {
     }
 
     /**
-     *Berechnet die Rentenversicherung (Arbeitnehmeranteil)
+     * Berechnet die Rentenversicherung (Arbeitnehmeranteil)
      * AN zahlt 50% des Gesamtbeitragssatzes
      *
      * @param bruttogehalt Bruttogehalt monatlich
      * @param rvSatzGesamt RF Gesamtbeitragssatz (z.B. 18,6%)
-     * @param bbgRV Beitragsbemessungsgrenze Rentenversicherung
+     * @param bbgRV        Beitragsbemessungsgrenze Rentenversicherung
      * @return RV-Beitrag Arbeitnehmeranteil in EUR
      */
 
@@ -91,7 +92,7 @@ public class Sozialabgabenrechner {
      *
      * @param bruttogehalt Bruttogehalt monatlich
      * @param avSatzGesamt AV Gesamtbeitragssatz (z.B. 2.6%)
-     * @param bbgAV Beitragsbemessungsgrenze AV
+     * @param bbgAV        Beitragsbemessungsgrenze AV
      * @return AV-Beitrag Arbeitnehmeranteil in Euro
      */
 
@@ -109,12 +110,18 @@ public class Sozialabgabenrechner {
     }
 
     /**
-     * Berechnet Pflegeversicherung mit Kinderanzahl-Staffelung (2025)
+     * * Berechnet Pflegeversicherung mit Kinderanzahl-Staffelung.
+     * Die konkreten Prozentsätze werden als Parameter übergeben (siehe CSV-Konfiguration),
+     * die folgenden Werte dienen nur als Beispiel zur Veranschaulichung der Logik:
+     *
+     * Beispielhafte Regelung (Werte aus sozialversicherung_saetze.csv):
+     * - Basis: 1.8% (mit 0 oder 1 Kind)
+     * berechnet Pflegeversicherung mit Kinderanzahl-Staffelung (bsp. 2025)
      *
      * Regelung 2025:
      * - Basis: 1.8% (mit 0 oder 1 Kind)
      * - Kinderlos >23: 1.8% + 0.6% Zuschlag = 2.4%
-     * - Ab 2 Kindern: 1.8% - 0.25% pro Kind (bis max 5 Kinder = -1.0%)
+     * - Ab 2 Kindern: 1.8% - 0.25% pro Kind (bis max. 5 Kinder = -1.0%)
      *
      * Beispiele:
      * - 0 Kinder, 30 Jahre: 2.4%
@@ -123,18 +130,18 @@ public class Sozialabgabenrechner {
      * - 3 Kinder: 1.3%
      * - 5 Kinder: 0.8%
      *
-     * @param bruttogehalt Bruttogehalt in Euro
-     * @param pvSatzGesamt Basis-Satz (1.8%)
+     * @param bruttogehalt        Bruttogehalt in Euro
+     * @param pvSatzGesamt        Basis-Satz (1.8%)
      * @param pvZuschlagKinderlos Zuschlag für Kinderlose (0.6%)
-     * @param pvAbschlagProKind Abschlag pro Kind ab dem 2. Kind (0.25%)
-     * @param anzahlKinder Anzahl Kinder unter 25 Jahren
-     * @param alter Alter des Versicherten
-     * @param bbgPV Beitragsbemessungsgrenze PV
+     * @param pvAbschlagProKind   Abschlag pro Kind ab dem 2. Kind (0.25%)
+     * @param anzahlKinder        Anzahl Kinder unter 25 Jahren
+     * @param alter               Alter des Versicherten
+     * @param bbgPV               Beitragsbemessungsgrenze PV
      * @return PV-Beitrag in EUR
      */
 
 
-     public static double berechnePflegeversicherung(
+    public static double berechnePflegeversicherung(
             double bruttogehalt,
             double pvSatzGesamt,          // 3.6%
             double pvZuschlagKinderlos, // 0.6
@@ -143,54 +150,32 @@ public class Sozialabgabenrechner {
             int alter,
             double bbgPV
     ) {
-         double bemessungsgrundlage = Math.min(bruttogehalt, bbgPV);
+        double bemessungsgrundlage = Math.min(bruttogehalt, bbgPV);
 
-         // Arbeitnehmeranteil Basis = Hälfte des Gesamtsatzes
-         double satz = pvSatzGesamt / 2;  // 3.6 / 2 = 1.8%
+        // Arbeitnehmeranteil Basis = Hälfte des Gesamtsatzes
+        double satz = pvSatzGesamt / 2;  // 3.6 / 2 = 1.8%
 
         // Kinderlose über 23 zahlen Zuschlag
 
-         if (anzahlKinder == 0 && alter > 23) {
-             // Kinderlos über 23: Zuschlag
-             satz += pvZuschlagKinderlos;  // 1.8 + 0.6 = 2.4%
+        if (anzahlKinder == 0 && alter > 23) {
+            // Kinderlos über 23: Zuschlag
+            satz += pvZuschlagKinderlos;  // 1.8 + 0.6 = 2.4%
 
-         } else if (anzahlKinder >= 2) {
-             // 2 oder mehr Kinder: Abschlag (max 5 Kinder berücksichtigt)
-             int kinderFürAbschlag = Math.min(anzahlKinder, 5);
+        } else if (anzahlKinder >= 2) {
+            // 2 oder mehr Kinder: Abschlag (max 5 Kinder berücksichtigt)
+            int kinderFuerAbschlag = Math.min(anzahlKinder, 5);
 
-             // Abschlag gilt ab dem 2. Kind
-             // 2 Kinder: 1x 0.25% = 0.25%
-             // 3 Kinder: 2x 0.25% = 0.50%
-             // 5 Kinder: 4x 0.25% = 1.00%
-             double abschlag = (kinderFürAbschlag - 1) * pvAbschlagProKind;
-             satz -= abschlag;
-         }
-         // 1 Kind oder ≤23 Jahre: Bleibt bei Basis-Satz 1.8%
+            // Abschlag gilt ab dem 2. Kind
+            // 2 Kinder: 1x 0.25% = 0.25%
+            // 3 Kinder: 2x 0.25% = 0.50%
+            // 5 Kinder: 4x 0.25% = 1.00%
+            double abschlag = (kinderFuerAbschlag - 1) * pvAbschlagProKind;
+            satz -= abschlag;
+        }
+        // 1 Kind oder ≤23 Jahre: Bleibt bei Basis-Satz 1.8%
 
-         return bemessungsgrundlage * satz / 100;
-     }
-
-    /**
-     * Berechnet Summe aller Sozialabgaben
-     */
-    /**public static double berechneGesamtSozialabgaben(
-            double bruttogehalt,
-            double kvBasis,
-            double kvZusatz,
-            double rvSatz,
-            double avSatz,
-            double pvStandard,
-            double pvKinderlos,
-            boolean kinderlos,
-            int alter
-    ) {
-        // TODO: Implementieren
+        return bemessungsgrundlage * satz / 100;
     }
-     */
-
-
-
-
 
 
 }

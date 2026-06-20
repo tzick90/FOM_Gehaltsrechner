@@ -4,7 +4,7 @@ import util.Ergebnis;
 
 /**
  * Hauptlogik für die vereinfachte Brutto-Netto-Berechnung im Projektmodus.
- * Nutzt ProjektAbgabenberechner für die Sozialversicherungsbeiträge.
+ * Nutzt FOMAbgabenrechner für die Sozialversicherungsbeiträge.
  * Keine CSVs, keine Beitragsbemessungsgrenzen, keine Jahresabhängigkeit.
  */
 
@@ -14,10 +14,18 @@ public class FOMGehaltsrechner {
     public static final String[] GUELTIGE_STEUERKLASSEN = {"I", "III", "IV"};
 
     /**
+     * Berechnet das Nettogehalt nach den vereinfachten Regeln des Projektmodus.
+     *
+     * @param brutto          Bruttogehalt, monatlich
      * @param steuerklasse    "I", "III" oder "IV"
      * @param kirchenmitglied "Ja" oder "Nein"
-     * @param kvZusatzbeitrag KV-Zusatzbeitrag in % (Standard 1.3, vom User überschreibbar)
+     * @param bundesland      Bundesland (voller Name, z.B. "Bayern") zur Ermittlung der Kirchensteuer
+     * @param kinderanzahl    Anzahl der Kinder
+     * @param alter           Alter des Versicherten
+     * @param kvZusatzbeitrag KV-Zusatzbeitrag in % (Standard 1,3, vom User überschreibbar)
+     * @return Ergebnis-Objekt mit allen Berechnungen
      */
+
     public static Ergebnis berechneGehalt(
             double brutto,
             String steuerklasse,

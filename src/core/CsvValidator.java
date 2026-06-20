@@ -1,8 +1,11 @@
 package core;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 
 public class CsvValidator {
 
@@ -11,7 +14,8 @@ public class CsvValidator {
      * (sozialversicherung_saetze, einkommensteuer_grenzen, pauschalen, steuer_saetze)
      */
     public static String pruefeMitJahrCsv(String pfad) {
-        try (BufferedReader br = new BufferedReader(new FileReader(pfad))) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(pfad), StandardCharsets.UTF_8))) {
             br.readLine(); // Header
             String zeile = br.readLine();
             if (zeile == null) return "Datei ist leer";
@@ -33,10 +37,11 @@ public class CsvValidator {
     }
 
     /**
-     * Prüft Krankenkassen-CSV: "Krankenkasse, Beitragssatz%, Zusatzbeitrag%"
+     * Prüft Krankenkassen-CSV: "Krankenkasse, Jahr, Beitragssatz%, Zusatzbeitrag%"
      */
     public static String pruefeKrankenkassenCsv(String pfad) {
-        try (BufferedReader br = new BufferedReader(new FileReader(pfad))) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(pfad), StandardCharsets.UTF_8))) {
             br.readLine(); // Header
             String zeile = br.readLine();
             if (zeile == null) return "Datei ist leer";
@@ -64,7 +69,8 @@ public class CsvValidator {
      * Prüft Bundesländer-CSV: "Bundesland, Jahr, Kirchensteuer, Region"
      */
     public static String pruefeBundeslaenderCsv(String pfad) {
-        try (BufferedReader br = new BufferedReader(new FileReader(pfad))) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(pfad), StandardCharsets.UTF_8))) {
             br.readLine(); // Header
             String zeile = br.readLine();
             if (zeile == null) return "Datei ist leer";

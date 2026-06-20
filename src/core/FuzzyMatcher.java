@@ -17,22 +17,21 @@ import java.util.ArrayList;
      */
 
 
-
 public class FuzzyMatcher {
     /**
      * Sucht einen passenden Key in einer Map mit Fuzzy-Matching
      *
-     * @param <T>         Typ der Map-Values
-     * @param eingabe     User-Eingabe (z.B. "TK", "Bayern", "bw")
-     * @param daten       Map mit möglichen Werten
-     * @param abkürzungen Optional: Map mit Abkürzungen → Volltext
+     * @param <T>          Typ der Map-Values
+     * @param eingabe      User-Eingabe (z.B. "TK", "Bayern", "bw")
+     * @param daten        Map mit möglichen Werten
+     * @param abkuerzungen Optional: Map mit Abkürzungen → Volltext
      * @return Gefundener Key oder null
      */
 
     public static <T> String finde(
             String eingabe,
             Map<String, T> daten,
-            Map<String, String> abkürzungen
+            Map<String, String> abkuerzungen
     ) {
         if (eingabe == null || eingabe.trim().isEmpty()) {
             return null;
@@ -48,8 +47,8 @@ public class FuzzyMatcher {
         }
 
         // 2. Annahme: Es müssen Abkürzungen aufgelöst werden
-        if (abkürzungen != null && abkürzungen.containsKey(eingabe)) {
-            String aufgelöst = abkürzungen.get(eingabe);
+        if (abkuerzungen != null && abkuerzungen.containsKey(eingabe)) {
+            String aufgelöst = abkuerzungen.get(eingabe);
             // Rekursiv mit aufgelöster Abkürzung suchen
             return finde(aufgelöst, daten, null);
         }
@@ -70,6 +69,7 @@ public class FuzzyMatcher {
 
         return null;
     }
+
     /*
      Überladung ohne Abkürzungen
      */
@@ -81,21 +81,25 @@ public class FuzzyMatcher {
      * Gibt Vorschläge bei fehlgeschlagener Suche,
      * findet ähnliche Strings basierend auf Anfangsbuchstaben
      *
-     * @param <T> Typ der Map-Values
-     * @param eingabe User-Eingabe
-     * @param daten Map mit möglichen Werten
-     * @param maxVorschläge Maximale Anzahl Vorschläge
+     * @param <T>            Typ der Map-Values
+     * @param eingabe        User-Eingabe
+     * @param daten          Map mit möglichen Werten
+     * @param maxVorschlaege Maximale Anzahl Vorschläge
      * @return Liste ähnlicher Keys
      */
-    public static <T> List<String> gibVorschläge(
+
+    /*
+    - Diese Methode wird aufgrund der Verwendung der GUI nicht mehr verwendet.
+
+    public static <T> List<String> gibVorschlaege(
             String eingabe,
             Map<String, T> daten,
-            int maxVorschläge
+            int maxVorschlaege
     ) {
-        List<String> vorschläge = new ArrayList<>();
+        List<String> vorschlaege = new ArrayList<>();
 
         if (eingabe == null || eingabe.trim().isEmpty()) {
-            return vorschläge;
+            return vorschlaege;
         }
 
         eingabe = eingabe.toLowerCase().trim();
@@ -105,82 +109,95 @@ public class FuzzyMatcher {
         // Sammle Keys mit ähnlichen Anfangsbuchstaben
         for (String key : daten.keySet()) {
             if (key.toLowerCase().startsWith(prefix)) {
-                vorschläge.add(key);
-                if (vorschläge.size() >= maxVorschläge) {
+                vorschlaege.add(key);
+                if (vorschlaege.size() >= maxVorschlaege) {
                     break;
                 }
             }
         }
 
-        return vorschläge;
+        return vorschlaege;
     }
-        /**
-         * Generiert automatisch Abkürzungen aus Map-Keys
-         *
-         * Erstellt Mappings für:
-         * - Lowercase-Versionen
-         * - Erste Buchstaben jedes Wortes (z.B. "AOK Bayern" -> "ab")
-         * - Bekannte Abkürzungen (TK, DAK, etc.)
-         *
-         * @param <T> Typ der Map-Values
-         * @param daten Ursprüngliche Map
-         * @return Map mit automatisch generierten Abkürzungen
-         */
-        public static <T> Map<String, String> generiereAbkürzungen(Map<String, T> daten) {
-            Map<String, String> abkürzungen = new java.util.HashMap<>();
 
-            for (String key : daten.keySet()) {
-                String keyLower = key.toLowerCase();
+     */
 
-                // 1. Lowercase-Version
-                abkürzungen.put(keyLower, key);
-
-                // 2. Erste Buchstaben jedes Wortes (z.B. "AOK Bayern" -> "ab")
-                String[] wörter = key.split("\\s+");
-                if (wörter.length > 1) {
-                    StringBuilder initiale = new StringBuilder();
-                    for (String wort : wörter) {
-                        if (!wort.isEmpty()) {
-                            initiale.append(wort.charAt(0));
-                        }
-                    }
-                    abkürzungen.put(initiale.toString().toLowerCase(), key);
-                }
-
-                // 3. Erstes Wort alleine (z.B. "Techniker Krankenkasse" -> "techniker")
-                if (wörter.length > 0 && !wörter[0].isEmpty()) {
-                    abkürzungen.put(wörter[0].toLowerCase(), key);
-                }
-
-                // 4. Bekannte Kurzformen extrahieren
-                // z.B. "TK" aus "Techniker Krankenkasse (TK)"
-                if (key.contains("(") && key.contains(")")) {
-                    int start = key.indexOf("(") + 1;
-                    int end = key.indexOf(")");
-                    if (start < end) {
-                        String kurzform = key.substring(start, end).trim();
-                        abkürzungen.put(kurzform.toLowerCase(), key);
-                    }
-                }
-            }
-
-            return abkürzungen;
-        }
-
-        // Neue Methode: Finde alle passendes Key (nicht nur den ersten)
 
     /**
-     * @param <T> Typ der Map-Values
-     * @param eingabe User-Eingabe
-     * @param daten Map mit möglichen Werten
-     * @param abkürzungen Optional: Map mit Abkürzungen
+     * Generiert automatisch Abkürzungen aus Map-Keys
+     * <p>
+     * Erstellt Mappings für:
+     * - Lowercase-Versionen
+     * - Erste Buchstaben jedes Wortes (z.B. "AOK Bayern" -> "ab")
+     * - Bekannte Abkürzungen (TK, DAK, etc.)
+     *
+     * @param <T>   Typ der Map-Values
+     * @param daten Ursprüngliche Map
+     * @return Map mit automatisch generierten Abkürzungen
+     */
+
+    /*
+    - Diese Methode wurde für das Testing in, bzw. durch / mittels Konsolen-Eingabe verwenden.
+
+    public static <T> Map<String, String> generiereAbkuerzungen(Map<String, T> daten) {
+        Map<String, String> abkuerzungen = new java.util.HashMap<>();
+
+        for (String key : daten.keySet()) {
+            String keyLower = key.toLowerCase();
+
+            // 1. Lowercase-Version
+            abkuerzungen.put(keyLower, key);
+
+            // 2. Erste Buchstaben jedes Wortes (z.B. "AOK Bayern" -> "ab")
+            String[] woerter = key.split("\\s+");
+            if (woerter.length > 1) {
+                StringBuilder initiale = new StringBuilder();
+                for (String wort : woerter) {
+                    if (!wort.isEmpty()) {
+                        initiale.append(wort.charAt(0));
+                    }
+                }
+                abkuerzungen.put(initiale.toString().toLowerCase(), key);
+            }
+
+            // 3. Erstes Wort alleine (z.B. "Techniker Krankenkasse" -> "techniker")
+            if (woerter.length > 0 && !woerter[0].isEmpty()) {
+                abkuerzungen.put(woerter[0].toLowerCase(), key);
+            }
+
+            // 4. Bekannte Kurzformen extrahieren
+            // z.B. "TK" aus "Techniker Krankenkasse (TK)"
+            if (key.contains("(") && key.contains(")")) {
+                int start = key.indexOf("(") + 1;
+                int end = key.indexOf(")");
+                if (start < end) {
+                    String kurzform = key.substring(start, end).trim();
+                    abkuerzungen.put(kurzform.toLowerCase(), key);
+                }
+            }
+        }
+
+        return abkuerzungen;
+    }
+
+     */
+
+    // Neue Methode: Finde alle passendes Keys (nicht nur den ersten)
+
+    /**
+     * Sucht alle passenden Keys in einer Map mit Fuzzy-Matching (im Gegensatz zu finde(),
+     * das nur den ersten Treffer liefert). Wird für die Live-Filterung in Dropdown-Feldern verwendet.
+     *
+     * @param <T>          Typ der Map-Values
+     * @param eingabe      User-Eingabe
+     * @param daten        Map mit möglichen Werten
+     * @param abkuerzungen Optional: Map mit Abkürzungen
      * @return Liste aller gefundenen Keys (leer wenn nichts gefunden)
      */
 
     public static <T> List<String> findeAlle(
             String eingabe,
             Map<String, T> daten,
-            Map<String, String> abkürzungen
+            Map<String, String> abkuerzungen
     ) {
         List<String> treffer = new ArrayList<>();
 
@@ -200,8 +217,8 @@ public class FuzzyMatcher {
 
         // 2. Abkürzungen auflösen
         String aufgelöst = eingabe;
-        if (abkürzungen != null && abkürzungen.containsKey(eingabe)) {
-            aufgelöst = abkürzungen.get(eingabe).toLowerCase();
+        if (abkuerzungen != null && abkuerzungen.containsKey(eingabe)) {
+            aufgelöst = abkuerzungen.get(eingabe).toLowerCase();
         }
 
         // 3. Substring-Match (Key enthält Eingabe) - ALLE sammeln

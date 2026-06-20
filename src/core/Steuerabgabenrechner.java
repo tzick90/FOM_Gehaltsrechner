@@ -6,49 +6,12 @@ public class Steuerabgabenrechner {
   * Verwenden einer inneren Klasse um die Steuerergebnisse zu sparen (Jahr + Monat)
   */
 
- public static class Steuererbnis {
-   private double lohnsteuerJahr;
-   private double lohnsteuerMonat;
-   private double kirchensteuerJahr;
-   private double kirchensteuerMonat;
 
-   public Steuererbnis(
-           double lohnsteuerJahr,
-           double kirchensteuerJahr
-   ) {
-    this.kirchensteuerJahr = lohnsteuerJahr;
-    this.lohnsteuerMonat = lohnsteuerJahr / 12;
-    this.kirchensteuerJahr = kirchensteuerJahr;
-    this.kirchensteuerMonat = kirchensteuerJahr / 12;
-   }
-
-   public double getLohnsteuerJahr() { return lohnsteuerJahr; }
-   public double getLohnsteuerMonat() {return lohnsteuerMonat;}
-
-   public double getKirchensteuerJahr() { return kirchensteuerJahr; }
-   public double getKirchensteuerMonat() { return kirchensteuerMonat; }
-
-   // Berechne die Summen
-   public double getSteuernGesamtJahr() {
-     return lohnsteuerJahr + kirchensteuerJahr;
-   }
-   public double getSteuernGesamtMonat() {
-     return lohnsteuerMonat + kirchensteuerMonat;
-   }
-
-   @Override
-   public String toString() {
-     return String.format(
-             "Lohnsteuer: %.2f€/Jahr (%.2f€/Monat), Kirchensteuer: %.2f€/Jahr (%.2f€/Monat)",
-             lohnsteuerJahr, lohnsteuerMonat, kirchensteuerJahr, kirchensteuerMonat
-     );
-   }
- }
 
   /**
-   * Berechnet die Lohnsteuer für die Klasse I und IV -> wgn. 4 nochmal mit Marie validieren!!
-   *Berechnet Lohnsteuer nach §32a EStG (progressiv)
-   *GIBT JAHRESWERT ZURÜCK!
+   * Berechnet die Lohnsteuer für die Klasse I und IV.
+   * Berechnet Lohnsteuer nach §32a EStG (progressiv)
+   * GIBT JAHRESWERT ZURÜCK!
    * @param bruttoMonat Bruttogehalt monatlich
    * @param grundfreibetrag Grundfreibetrag
    * @param zone1Ende Ende Zone 1
@@ -79,7 +42,7 @@ public class Steuerabgabenrechner {
              - werbekostenpauschale
              - sonderausgaben;
 
-     // Sicherstellen, dass das zuversteuernde Einkommen (zVE) nicht negativ wird!
+     // Sicherstellen, dass das zu versteuernde Einkommen (zVE) nicht negativ wird!
      if (zvE < 0) {
          zvE = 0;
      }
