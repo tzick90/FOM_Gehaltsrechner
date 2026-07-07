@@ -50,7 +50,7 @@ public class CsvReader {
                 try {
                     zeilenJahr = Integer.parseInt(teile[1].trim());
                 } catch (NumberFormatException e) {
-                    System.err.println("Ungültiges Jahr in Zeile: " + zeile);
+                    //System.err.println("Ungültiges Jahr in Zeile: " + zeile);
                     continue;
                 }
 

@@ -561,6 +561,14 @@ public class GUI extends Component {
                         "Fehler", JOptionPane.WARNING_MESSAGE);
                 return;
             }
+            // Steuerklasse II erfordert mindestens 1 Kind
+            if (chosenTaxClass.equals("II") && nKids == 0) {
+                JOptionPane.showMessageDialog(frame,
+                        "Steuerklasse II ist nur für Alleinerziehende mit " +
+                                "mindestens einem Kind im Haushalt zulässig!",
+                        "Ungültige Eingabe", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
             Ergebnis ergebnis;
             int fiscalYear = 0;

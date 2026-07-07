@@ -163,7 +163,7 @@ public class ProgramSettings extends JDialog {
         properties.setProperty("sozialversicherungsSaetzePfad", sozialversicherungsSaetze.getText());
 
 
-        properties.setProperty("modus", fomModeRadio.isSelected() ? "FOM Projektmodus":"Professional-Modus");
+        properties.setProperty("modus", fomModeRadio.isSelected() ? "Projektmodus":"Vollmodus");
 
         try (FileWriter fw = new FileWriter(SETTINGS_FILE)) {
             properties.store(fw, "Abgabenrechner Einstellungen");
@@ -175,6 +175,8 @@ public class ProgramSettings extends JDialog {
             // Hier wird die GUI des Rechners neu geladen, in Abhängigkeit vom gewähltem Modus des Rechners.
             // Auf diese Weise kann der Rechner beide Berechnungsmethoden auch über die GUI abdecken.
             SwingUtilities.invokeLater(GUI::buildGUI);
+            
+
 
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this,
@@ -205,7 +207,7 @@ public class ProgramSettings extends JDialog {
         // nicht automatisch wiederhergestellt (Default ist immer Vollmodus).
         // Innerhalb einer laufenden Session funktioniert die Moduswahl korrekt.
 
-        String modus = properties.getProperty("FOM Projektmodus", "Professional-Modus");
+        String modus = properties.getProperty("Projektmodus", "Vollmodus");
         if (modus.equals("Projektmodus")) {
             fomModeRadio.setSelected(true);
         } else {
@@ -281,7 +283,7 @@ public class ProgramSettings extends JDialog {
         }
 
         File file = new File(SETTINGS_FILE);
-        if (!file.exists()) return "Vollmodus";
+        if (!file.exists()) return "Wähle Modus!";
 
         Properties properties = new Properties();
         try (FileReader fr = new FileReader(file)) {
@@ -289,7 +291,7 @@ public class ProgramSettings extends JDialog {
         } catch (IOException e) {
             return "Vollmodus";
         }
-        return properties.getProperty("modus", "Vollmodus");
+        return properties.getProperty("modus", "Wähle Modus!");
     }
 
     public static boolean istProjektmodus() {
